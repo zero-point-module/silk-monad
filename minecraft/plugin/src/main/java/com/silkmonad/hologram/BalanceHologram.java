@@ -9,7 +9,7 @@ import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.jetbrains.annotations.Nullable;
 import org.bukkit.entity.Display.Billboard;
-import org.bukkit.entity.Player;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.TextDisplay;
 import org.bukkit.util.Transformation;
 import org.joml.AxisAngle4f;
@@ -28,19 +28,23 @@ public final class BalanceHologram {
 
     private final TextDisplay display;
 
-    public BalanceHologram(Player player) {
-        this.display = (TextDisplay) player.getWorld().spawnEntity(
-                player.getLocation(), org.bukkit.entity.EntityType.TEXT_DISPLAY);
+    public BalanceHologram(LivingEntity carrier) {
+        this(carrier, 0.6f);
+    }
+
+    public BalanceHologram(LivingEntity carrier, float yOffset) {
+        this.display = (TextDisplay) carrier.getWorld().spawnEntity(
+                carrier.getLocation(), org.bukkit.entity.EntityType.TEXT_DISPLAY);
         display.setBillboard(Billboard.CENTER);
         display.setSeeThrough(true);
         display.setShadowed(false);
         display.setPersistent(false);
         display.setTransformation(new Transformation(
-                new Vector3f(0f, 0.6f, 0f),
+                new Vector3f(0f, yOffset, 0f),
                 new AxisAngle4f(),
                 new Vector3f(1f, 1f, 1f),
                 new AxisAngle4f()));
-        player.addPassenger(display);
+        carrier.addPassenger(display);
     }
 
     public void update(List<Token> tokens, Map<String, BigDecimal> balances, @Nullable Merchant merchant) {

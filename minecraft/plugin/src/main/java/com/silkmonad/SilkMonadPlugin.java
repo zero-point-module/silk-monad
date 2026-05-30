@@ -100,7 +100,7 @@ public final class SilkMonadPlugin extends JavaPlugin {
         this.holograms = new HologramManager(this, balanceFetcher, tokens, merchants, profiles);
 
         // Crowd
-        this.crowdManager = new CrowdManager(this);
+        this.crowdManager = new CrowdManager(this, tokens, registry);
 
         // Commands
         this.walletCommand = new WalletCommand(this, profiles, holograms);

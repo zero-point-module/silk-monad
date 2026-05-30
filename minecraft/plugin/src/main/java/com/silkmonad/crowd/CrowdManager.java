@@ -1,50 +1,61 @@
 package com.silkmonad.crowd;
 
 import com.silkmonad.SilkMonadPlugin;
+import com.silkmonad.chain.Token;
+import com.silkmonad.chain.TokenRegistry;
+import com.silkmonad.cosmetic.Cosmetic;
+import com.silkmonad.cosmetic.CosmeticRegistry;
+import com.silkmonad.cosmetic.item.ItemCosmetic;
+import com.silkmonad.hologram.BalanceHologram;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.World;
+import org.bukkit.entity.Item;
 import org.bukkit.entity.Villager;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitTask;
-import org.bukkit.util.Vector;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
 /**
- * Spawns a configurable crowd of villagers around a center point and runs a
- * social-loop state machine: each one wanders for a while, then seeks the nearest
- * unpaired neighbour, walks over, faces them and emits particles/sounds as if
- * they were chatting, then drifts apart and starts over.
+ * Crowd of villager NPCs each with mock per-token balances. They wander, find a
+ * partner, walk over, and act out a trade by dropping cosmetic token items on
+ * the ground that the partner walks to and "picks up" (we remove the entity).
+ * Each NPC has a balance hologram above their head that updates live as their
+ * mock balances change.
  *
- * Villagers are non-persistent — they'll despawn naturally if no players are
- * nearby, and we explicitly remove them on plugin shutdown or /silk crowd clear.
+ * Nothing here touches the chain — it's a visual sandbox.
  */
 public final class CrowdManager {
 
-    /** How often the social-loop ticks (1s — villagers' own AI fills the gaps). */
-    private static final long TICK_INTERVAL = 20L;
-
-    /** Max distance to consider partners. Far-apart members keep roaming. */
+    private static final long TICK_INTERVAL = 20L; // 1s
     private static final double PAIR_RANGE_SQ = 32 * 32;
-
-    /** Close enough to be "chatting". */
     private static final double CHAT_RANGE = 2.5;
+    private static final double PICKUP_RANGE_SQ = 1.6 * 1.6;
 
     private final SilkMonadPlugin plugin;
+    private final TokenRegistry tokens;
+    private final CosmeticRegistry cosmetics;
     private final Map<UUID, CrowdMember> members = new HashMap<>();
     private BukkitTask tickTask;
 
-    public CrowdManager(SilkMonadPlugin plugin) {
+    public CrowdManager(SilkMonadPlugin plugin, TokenRegistry tokens, CosmeticRegistry cosmetics) {
         this.plugin = plugin;
+        this.tokens = tokens;
+        this.cosmetics = cosmetics;
     }
 
     public int activeCount() {
@@ -75,11 +86,14 @@ public final class CrowdManager {
                 vil.setAI(true);
                 vil.setAware(true);
                 vil.setCustomNameVisible(false);
-                // Lower volume / less chatter on default villager AI.
                 vil.setCanPickupItems(false);
+                vil.setSilent(true); // we'll make our own trade sounds
             });
 
-            CrowdMember m = new CrowdMember(v);
+            BalanceHologram hologram = new BalanceHologram(v, 0.4f);
+            CrowdMember m = new CrowdMember(v, hologram);
+            seedMockBalances(m, rng);
+            updateHologram(m);
             m.stateEndsAtMillis = System.currentTimeMillis() + roamDurationMillis(rng);
             members.put(v.getUniqueId(), m);
         }
@@ -93,6 +107,10 @@ public final class CrowdManager {
             tickTask = null;
         }
         for (CrowdMember m : members.values()) {
+            if (m.pendingOfferItem != null && m.pendingOfferItem.isValid()) {
+                m.pendingOfferItem.remove();
+            }
+            if (m.hologram != null) m.hologram.remove();
             if (m.villager.isValid()) m.villager.remove();
         }
         members.clear();
@@ -107,14 +125,19 @@ public final class CrowdManager {
         long now = System.currentTimeMillis();
         ThreadLocalRandom rng = ThreadLocalRandom.current();
 
-        // Prune dead/missing villagers.
-        members.values().removeIf(m -> !m.villager.isValid());
+        members.values().removeIf(m -> {
+            if (!m.villager.isValid()) {
+                if (m.hologram != null) m.hologram.remove();
+                if (m.pendingOfferItem != null && m.pendingOfferItem.isValid()) m.pendingOfferItem.remove();
+                return true;
+            }
+            return false;
+        });
         if (members.isEmpty()) {
             clear();
             return;
         }
 
-        // Advance each member's behaviour. Collect seekers for pairing.
         List<CrowdMember> seekers = new ArrayList<>();
         for (CrowdMember m : members.values()) {
             switch (m.state) {
@@ -145,7 +168,7 @@ public final class CrowdManager {
         if (partner == null || partner.partnerUuid == null
                 || !partner.partnerUuid.equals(m.villager.getUniqueId())
                 || partner.state != CrowdMember.State.CHATTING) {
-            // Partner gone / out of sync — fall back to seeking.
+            abandonTrade(m);
             m.state = CrowdMember.State.SEEKING;
             m.partnerUuid = null;
             return;
@@ -155,37 +178,122 @@ public final class CrowdManager {
         Location theirs = partner.villager.getLocation();
         double dist = mine.distance(theirs);
 
-        if (dist > CHAT_RANGE) {
-            // Walk toward partner.
+        // Attempt to pick up the partner's pending offer if we're close to it
+        if (partner.pendingOfferItem != null && partner.pendingOfferItem.isValid()) {
+            double itemDistSq = mine.distanceSquared(partner.pendingOfferItem.getLocation());
+            if (itemDistSq <= PICKUP_RANGE_SQ) {
+                consumeOffer(m, partner);
+            } else if (dist > CHAT_RANGE) {
+                // Walk towards the dropped item rather than the partner themselves
+                m.villager.getPathfinder().moveTo(partner.pendingOfferItem.getLocation(), 0.55);
+            }
+        } else if (dist > CHAT_RANGE) {
             m.villager.getPathfinder().moveTo(theirs, 0.55);
         } else {
-            // Stop and face them.
-            Vector toThem = theirs.toVector().subtract(mine.toVector());
-            if (toThem.lengthSquared() > 1e-6) {
-                m.villager.lookAt(theirs.getX(), theirs.getY() + 1.5, theirs.getZ());
+            // Close enough — face partner.
+            m.villager.lookAt(theirs.getX(), theirs.getY() + 1.5, theirs.getZ());
+
+            // The "lesser UUID" side decides when to drop the offer, so we don't double-drop.
+            boolean iAmLeader = m.villager.getUniqueId().compareTo(partner.villager.getUniqueId()) < 0;
+            if (iAmLeader && m.pendingOfferItem == null && partner.pendingOfferItem == null) {
+                // Both haven't offered yet — leader drops first.
+                dropOffer(m, rng);
+            } else if (!iAmLeader && m.pendingOfferItem == null && partner.pendingOfferItem != null) {
+                // Follower drops their counter-offer once they see the leader's offer.
+                dropOffer(m, rng);
             }
 
-            // Periodic chatter effects — only one side emits to avoid double-firing.
-            if (m.villager.getUniqueId().compareTo(partner.villager.getUniqueId()) < 0) {
-                if (rng.nextInt(4) == 0) {
-                    Location head = mine.clone().add(0, 1.8, 0);
-                    Location theirHead = theirs.clone().add(0, 1.8, 0);
-                    Location midpoint = head.clone().add(theirHead).multiply(0.5);
-                    midpoint.setWorld(mine.getWorld());
-                    mine.getWorld().spawnParticle(Particle.HAPPY_VILLAGER, midpoint, 3, 0.25, 0.25, 0.25);
-                }
-                if (rng.nextInt(10) == 0) {
-                    mine.getWorld().playSound(mine, Sound.ENTITY_VILLAGER_AMBIENT, 0.35f,
-                            0.9f + rng.nextFloat() * 0.3f);
-                }
+            if (iAmLeader && rng.nextInt(8) == 0) {
+                Location head = mine.clone().add(0, 1.8, 0);
+                Location theirHead = theirs.clone().add(0, 1.8, 0);
+                Location midpoint = head.clone().add(theirHead).multiply(0.5);
+                midpoint.setWorld(mine.getWorld());
+                mine.getWorld().spawnParticle(Particle.HAPPY_VILLAGER, midpoint, 3, 0.25, 0.25, 0.25);
             }
         }
 
         if (now >= m.stateEndsAtMillis) {
+            // End of chat: refund any unconsumed offer, reset state.
+            abandonTrade(m);
             m.state = CrowdMember.State.ROAMING;
             m.partnerUuid = null;
             m.stateEndsAtMillis = now + roamDurationMillis(rng);
             m.moveTarget = null;
+        }
+    }
+
+    private void dropOffer(CrowdMember m, ThreadLocalRandom rng) {
+        if (tokens.all().isEmpty() || cosmetics.size() == 0) return;
+        // Pick a token from those they actually hold a non-zero balance of.
+        List<Token> candidates = new ArrayList<>();
+        for (Token t : tokens.all()) {
+            BigDecimal bal = m.mockBalances.getOrDefault(t.symbol(), BigDecimal.ZERO);
+            if (bal.compareTo(BigDecimal.ONE) >= 0) candidates.add(t);
+        }
+        if (candidates.isEmpty()) return;
+        Token chosen = candidates.get(rng.nextInt(candidates.size()));
+        BigDecimal owned = m.mockBalances.get(chosen.symbol());
+        int maxOffer = Math.min(owned.intValue(), 8);
+        int amount = 1 + rng.nextInt(Math.max(1, maxOffer));
+
+        Optional<Cosmetic> cosmetic = cosmetics.get(chosen.symbol().toLowerCase(Locale.ROOT));
+        if (cosmetic.isEmpty() || !(cosmetic.get() instanceof ItemCosmetic ic)) return;
+
+        ItemStack stack = ic.newStack(amount);
+        Location dropLoc = m.villager.getLocation().add(0, 1.0, 0);
+        Item entity = m.villager.getWorld().dropItem(dropLoc, stack);
+        entity.setPickupDelay(Integer.MAX_VALUE); // no real player can grab it
+        entity.setUnlimitedLifetime(true);
+        // Toss it gently toward the partner so it lands between them
+        CrowdMember partner = m.partnerUuid != null ? members.get(m.partnerUuid) : null;
+        if (partner != null) {
+            Location target = partner.villager.getLocation();
+            org.bukkit.util.Vector toward = target.toVector().subtract(m.villager.getLocation().toVector()).normalize().multiply(0.2);
+            toward.setY(0.15);
+            entity.setVelocity(toward);
+        }
+
+        m.pendingOfferItem = entity;
+        m.pendingOfferToken = chosen.symbol();
+        m.pendingOfferAmount = amount;
+        m.mockBalances.merge(chosen.symbol(), BigDecimal.valueOf(amount), BigDecimal::subtract);
+        updateHologram(m);
+
+        m.villager.getWorld().playSound(m.villager.getLocation(),
+                Sound.ENTITY_ITEM_PICKUP, 0.4f, 0.7f);
+    }
+
+    private void consumeOffer(CrowdMember consumer, CrowdMember giver) {
+        if (giver.pendingOfferItem == null || giver.pendingOfferToken == null) return;
+        Item item = giver.pendingOfferItem;
+        String token = giver.pendingOfferToken;
+        int amount = giver.pendingOfferAmount;
+
+        consumer.mockBalances.merge(token, BigDecimal.valueOf(amount), BigDecimal::add);
+        updateHologram(consumer);
+
+        // Visual + audio
+        Location at = consumer.villager.getLocation().add(0, 1.0, 0);
+        consumer.villager.getWorld().spawnParticle(Particle.HAPPY_VILLAGER, at, 6, 0.3, 0.3, 0.3);
+        consumer.villager.getWorld().playSound(at, Sound.ENTITY_ITEM_PICKUP, 0.6f, 1.2f);
+
+        if (item.isValid()) item.remove();
+        giver.pendingOfferItem = null;
+        giver.pendingOfferToken = null;
+        giver.pendingOfferAmount = 0;
+    }
+
+    private void abandonTrade(CrowdMember m) {
+        if (m.pendingOfferItem != null) {
+            // Refund balance since trade didn't complete.
+            if (m.pendingOfferToken != null) {
+                m.mockBalances.merge(m.pendingOfferToken, BigDecimal.valueOf(m.pendingOfferAmount), BigDecimal::add);
+                updateHologram(m);
+            }
+            if (m.pendingOfferItem.isValid()) m.pendingOfferItem.remove();
+            m.pendingOfferItem = null;
+            m.pendingOfferToken = null;
+            m.pendingOfferAmount = 0;
         }
     }
 
@@ -220,13 +328,23 @@ public final class CrowdManager {
             }
         }
 
-        // Anyone still unpaired: drop back to ROAMING so they wander a bit then try again.
         for (CrowdMember m : seekers) {
             if (m.state != CrowdMember.State.SEEKING) continue;
             m.state = CrowdMember.State.ROAMING;
             m.stateEndsAtMillis = System.currentTimeMillis() + roamDurationMillis(rng);
             m.moveTarget = null;
         }
+    }
+
+    private void seedMockBalances(CrowdMember m, ThreadLocalRandom rng) {
+        for (Token t : tokens.all()) {
+            m.mockBalances.put(t.symbol(), BigDecimal.valueOf(50 + rng.nextInt(450)));
+        }
+    }
+
+    private void updateHologram(CrowdMember m) {
+        if (m.hologram == null) return;
+        m.hologram.update(tokens.all(), m.mockBalances, null);
     }
 
     private Location randomNearby(Location center, double minDist, double maxDist) {
@@ -241,10 +359,10 @@ public final class CrowdManager {
     }
 
     private static long roamDurationMillis(ThreadLocalRandom rng) {
-        return 12_000L + rng.nextLong(18_000L); // 12–30s wandering
+        return 12_000L + rng.nextLong(18_000L);
     }
 
     private static long chatDurationMillis(ThreadLocalRandom rng) {
-        return 12_000L + rng.nextLong(15_000L); // 12–27s chatting
+        return 12_000L + rng.nextLong(15_000L);
     }
 }

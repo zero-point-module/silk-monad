@@ -268,6 +268,14 @@ export class Agent {
                 convoManager.receiveFromBot(this.last_sender, msg_package);
             }
         }
+        else if (this.prompter.profile.goal) {
+            // A persona with a standing goal starts living it immediately: the
+            // self-prompter drives autonomous, in-character behavior (roaming,
+            // hailing, hawking, needling rivals) without waiting to be spoken to.
+            if (init_message)
+                this.history.add('system', init_message);
+            this.self_prompter.start(this.prompter.profile.goal);
+        }
         else if (init_message) {
             await this.handleMessage('system', init_message, 2);
         }

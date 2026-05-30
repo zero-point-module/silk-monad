@@ -44,6 +44,18 @@ export class Prompter {
         }
         // base overrides default, individual overrides base
 
+        // Example arrays concatenate instead of replacing: the default profile holds
+        // the shared mechanical examples (crafting, navigation, the trade command flow)
+        // and each individual profile appends its own voiced examples on top. Relevance
+        // selection then picks across the combined pool.
+        for (const key of ['conversation_examples', 'coding_examples']) {
+            const base_examples = base_profile[key] || [];
+            const own_examples = this.profile[key] && this.profile[key] !== base_profile[key]
+                ? this.profile[key]
+                : [];
+            this.profile[key] = [...base_examples, ...own_examples];
+        }
+
         this.convo_examples = null;
         this.coding_examples = null;
         

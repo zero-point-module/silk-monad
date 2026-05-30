@@ -44,6 +44,10 @@ public final class ChainClient {
         return rpc("eth_gasPrice", "[]").thenApply(ChainClient::parseHexBig);
     }
 
+    public CompletableFuture<BigInteger> ethBlockNumber() {
+        return rpc("eth_blockNumber", "[]").thenApply(ChainClient::parseHexBig);
+    }
+
     public CompletableFuture<String> ethSendRawTransaction(String signedTxHex) {
         String params = String.format("[\"%s\"]", signedTxHex);
         return rpc("eth_sendRawTransaction", params);

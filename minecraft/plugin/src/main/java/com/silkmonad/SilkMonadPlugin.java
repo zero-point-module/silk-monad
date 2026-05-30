@@ -101,6 +101,7 @@ public final class SilkMonadPlugin extends JavaPlugin {
         this.profiles = new PlayerProfileStore(this);
         MerchantRegistry merchants = new MerchantRegistry(this);
         this.holograms = new HologramManager(this, balanceFetcher, tokens, merchants, profiles);
+        holograms.start();
 
         // Crowd
         this.crowdManager = new CrowdManager(this, tokens, registry);

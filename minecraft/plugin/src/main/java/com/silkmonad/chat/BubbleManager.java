@@ -3,7 +3,6 @@ package com.silkmonad.chat;
 import com.silkmonad.SilkMonadPlugin;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
-import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.entity.Display.Billboard;
 import org.bukkit.entity.EntityType;
@@ -77,7 +76,12 @@ public final class BubbleManager {
         td.setShadowed(false);
         td.setPersistent(false);
         td.setLineWidth(180);
-        td.setBackgroundColor(Color.fromARGB(200, 0, 0, 0));
+        // Use Minecraft's native text overlay backdrop (same one tooltips and the
+        // scoreboard use) instead of a flat color — feels GUI-like.
+        td.setDefaultBackground(true);
+        // Interpolate position changes over the tick interval so the bubble glides
+        // instead of teleporting jerkily after the player.
+        td.setTeleportDuration((int) TICK_INTERVAL);
         td.setTransformation(new Transformation(
                 new Vector3f(0f, 0f, 0f),
                 new AxisAngle4f(),

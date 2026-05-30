@@ -15,13 +15,20 @@ import java.util.concurrent.CompletableFuture;
 
 /**
  * Pulls ERC-20 Transfer events involving a given wallet across every tracked
- * token. Two RPC calls (incoming + outgoing), merged + sorted newest-first.
+ * token. Monad testnet caps eth_getLogs at a 100-block range per call, so we
+ * step backward from the latest block in 100-block chunks until we've covered
+ * {@link #MAX_LOOKBACK_BLOCKS} of history, all in parallel.
  */
 public final class TransactionFetcher {
 
     /** keccak256("Transfer(address,address,uint256)") */
     private static final String TRANSFER_TOPIC =
             "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef";
+
+    /** Monad-imposed limit; do not exceed without changing the chunk strategy. */
+    private static final int MAX_BLOCK_RANGE = 100;
+    /** How far back in history to scan. ~5000 blocks ≈ 80 min at 1s blocks. */
+    private static final int MAX_LOOKBACK_BLOCKS = 5000;
 
     private final ChainClient chain;
     private final TokenRegistry tokens;
@@ -33,25 +40,37 @@ public final class TransactionFetcher {
 
     public CompletableFuture<List<TransferEvent>> fetchInvolving(String address) {
         String paddedAddress = padTopicAddress(address);
-        String addressArray = tokenAddressArrayJson();
+        String addressArrayJson = tokenAddressArrayJson();
         Map<String, Token> byAddress = tokenAddressMap();
 
-        String outgoingFilter = String.format(
-                "{\"fromBlock\":\"0x0\",\"toBlock\":\"latest\",\"address\":%s,\"topics\":[\"%s\",\"%s\",null]}",
-                addressArray, TRANSFER_TOPIC, paddedAddress);
-        String incomingFilter = String.format(
-                "{\"fromBlock\":\"0x0\",\"toBlock\":\"latest\",\"address\":%s,\"topics\":[\"%s\",null,\"%s\"]}",
-                addressArray, TRANSFER_TOPIC, paddedAddress);
-
-        CompletableFuture<JsonArray> outgoing = chain.ethGetLogs(outgoingFilter);
-        CompletableFuture<JsonArray> incoming = chain.ethGetLogs(incomingFilter);
-
-        return outgoing.thenCombine(incoming, (out, in) -> {
-            List<TransferEvent> events = new ArrayList<>();
-            decode(out, byAddress, events);
-            decode(in, byAddress, events);
-            events.sort(Comparator.comparing(TransferEvent::blockNumber).reversed());
-            return events;
+        return chain.ethBlockNumber().thenCompose(latest -> {
+            BigInteger start = latest.subtract(BigInteger.valueOf(MAX_LOOKBACK_BLOCKS)).max(BigInteger.ZERO);
+            List<CompletableFuture<JsonArray>> chunks = new ArrayList<>();
+            for (BigInteger from = start; from.compareTo(latest) <= 0;
+                 from = from.add(BigInteger.valueOf(MAX_BLOCK_RANGE))) {
+                BigInteger to = from.add(BigInteger.valueOf(MAX_BLOCK_RANGE - 1L)).min(latest);
+                String fromHex = "0x" + from.toString(16);
+                String toHex = "0x" + to.toString(16);
+                // Outgoing (from = address)
+                chunks.add(chain.ethGetLogs(String.format(
+                        "{\"fromBlock\":\"%s\",\"toBlock\":\"%s\",\"address\":%s,\"topics\":[\"%s\",\"%s\",null]}",
+                        fromHex, toHex, addressArrayJson, TRANSFER_TOPIC, paddedAddress))
+                        .exceptionally(ex -> new JsonArray()));
+                // Incoming (to = address)
+                chunks.add(chain.ethGetLogs(String.format(
+                        "{\"fromBlock\":\"%s\",\"toBlock\":\"%s\",\"address\":%s,\"topics\":[\"%s\",null,\"%s\"]}",
+                        fromHex, toHex, addressArrayJson, TRANSFER_TOPIC, paddedAddress))
+                        .exceptionally(ex -> new JsonArray()));
+            }
+            return CompletableFuture.allOf(chunks.toArray(new CompletableFuture[0]))
+                    .thenApply(v -> {
+                        List<TransferEvent> events = new ArrayList<>();
+                        for (CompletableFuture<JsonArray> f : chunks) {
+                            decode(f.join(), byAddress, events);
+                        }
+                        events.sort(Comparator.comparing(TransferEvent::blockNumber).reversed());
+                        return events;
+                    });
         });
     }
 
@@ -102,7 +121,6 @@ public final class TransactionFetcher {
 
     private static String topicToAddress(String topic) {
         String h = topic.startsWith("0x") ? topic.substring(2) : topic;
-        // last 40 chars
         return "0x" + h.substring(h.length() - 40).toLowerCase(Locale.ROOT);
     }
 

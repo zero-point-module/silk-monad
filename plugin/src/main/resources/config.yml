@@ -3,9 +3,3 @@ chain:
   chain-id: 10143
   # The wallet that signs /silk give mints lives in data/plugins/SilkMonad/secrets.yml
   # (deployer-private-key). Never commit that file.
-
-chat:
-  use-deterministic-colors: true
-  # MiniMessage template. Placeholders: <name>, <message>.
-  # The plugin substitutes <name-color> with the player's resolved color before parsing.
-  format: "<bold><name-color><name></name-color></bold> <gray>›</gray> <white><message></white>"

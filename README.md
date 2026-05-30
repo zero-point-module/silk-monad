@@ -87,16 +87,6 @@ sequenceDiagram
 | Contracts | Solidity · OpenZeppelin ERC-20                                                  |
 | Chain     | Monad Testnet                                                                   |
 
-**Monad network**
-
-|           |                                     |
-| --------- | ----------------------------------- |
-| RPC       | `https://testnet-rpc.monad.xyz`     |
-| Chain ID  | `10143`                             |
-| Gas token | `MON`                               |
-| Explorer  | `https://testnet.monadexplorer.com` |
-| Faucet    | `https://faucet.monad.xyz`          |
-
 ## 🚀 Quickstart
 
 ```bash

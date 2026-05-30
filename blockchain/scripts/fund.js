@@ -7,8 +7,8 @@ import { createWalletClient, http, parseUnits, parseEther, formatEther } from 'v
 import {
   monadTestnet, RPC_URL, publicClient, txUrl,
   loadAgents, loadTokens, deployerAccount,
-} from '../lib/config.js';
-import { ERC20_ABI } from '../lib/abi.js';
+} from './lib/config.js';
+import { ERC20_ABI } from './lib/abi.js';
 
 const MIN_AGENT_MON = parseEther('0.05');
 const TOP_UP_MON = parseEther('0.2');
@@ -49,7 +49,7 @@ async function main() {
       console.log(txUrl(hash));
     }
   }
-  console.log('\n  Funding complete. Set CHAIN_IMPL=real and agents can trade on-chain.\n');
+  console.log('\n  Funding complete. Agents can now trade on-chain.\n');
 }
 
 main().catch((error) => {

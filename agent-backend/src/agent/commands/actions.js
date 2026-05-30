@@ -1,6 +1,8 @@
 import * as skills from '../library/skills.js';
 import settings from '../settings.js';
 import convoManager from '../conversation.js';
+import * as erc20 from '../../../../blockchain/erc20.js';
+import { getAddress } from '../../../../blockchain/wallets.js';
 
 
 function runAsAction (actionFn, resume = false, timeout = -1) {
@@ -498,5 +500,49 @@ export const actionsList = [
         perform: runAsAction(async (agent, tool_name, target) => {
             await skills.useToolOn(agent.bot, tool_name, target);
         })
+    },
+    {
+        name: '!payToken',
+        description: "Send an on-chain ERC20 token payment to another bot/player on Monad. Use after you've agreed a price, then tell them the transaction hash so they can verify it.",
+        params: {
+            'player_name': { type: 'string', description: 'The name of the bot/player to pay.' },
+            'token': { type: 'string', description: 'The token symbol to send, e.g. SILK.' },
+            'amount': { type: 'float', description: 'The amount of the token to send.', domain: [0, Number.MAX_SAFE_INTEGER, '(]'] }
+        },
+        perform: async function (agent, player_name, token, amount) {
+            try {
+                const to = getAddress(player_name);
+                if (!to)
+                    return `No wallet address is on record for ${player_name}; cannot pay them.`;
+                const { hash } = await erc20.transfer(agent.name, token, to, amount);
+                return `Sent ${amount} ${token} to ${player_name} (${to}). Transaction hash: ${hash}. Tell them this hash so they can verify the payment.`;
+            } catch (err) {
+                return `Payment failed: ${err.shortMessage || err.message}`;
+            }
+        }
+    },
+    {
+        name: '!verifyPayment',
+        description: "Verify on-chain that a bot/player actually paid you at least the agreed amount of a token, using the transaction hash they gave you. Always do this BEFORE handing over an item.",
+        params: {
+            'player_name': { type: 'string', description: 'The bot/player who claims to have paid you.' },
+            'token': { type: 'string', description: 'The token symbol you expected, e.g. SILK.' },
+            'amount': { type: 'float', description: 'The minimum amount you expected to receive.', domain: [0, Number.MAX_SAFE_INTEGER, '(]'] },
+            'tx_hash': { type: 'string', description: 'The transaction hash the payer gave you.' }
+        },
+        perform: async function (agent, player_name, token, amount, tx_hash) {
+            try {
+                const to = getAddress(agent.name);
+                if (!to)
+                    return `You have no wallet address on record; cannot verify payments.`;
+                const from = getAddress(player_name);
+                const res = await erc20.verifyTransfer(tx_hash, { symbol: token, from, to, minAmount: amount });
+                if (res.ok)
+                    return `Payment verified: received ${res.value} ${res.symbol} from ${player_name}. It is now safe to hand over the item.`;
+                return `Payment NOT verified: ${res.reason} Do not hand over the item yet.`;
+            } catch (err) {
+                return `Could not verify payment: ${err.shortMessage || err.message}`;
+            }
+        }
     },
 ];

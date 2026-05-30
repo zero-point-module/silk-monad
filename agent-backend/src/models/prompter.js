@@ -5,6 +5,7 @@ import { SkillLibrary } from "../agent/library/skill_library.js";
 import { stringifyTurns } from '../utils/text.js';
 import { getCommand } from '../agent/commands/index.js';
 import settings from '../agent/settings.js';
+import { getPersona } from '../agent/agent_registry.js';
 import { promises as fs } from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -136,6 +137,14 @@ export class Prompter {
 
     async replaceStrings(prompt, messages, examples=null, to_summarize=[], last_goals=null) {
         prompt = prompt.replaceAll('$NAME', this.agent.name);
+
+        if (prompt.includes('$PERSONA')) {
+            const persona = getPersona(this.agent.name);
+            const personaText = persona
+                ? `You are roleplaying as ${persona.name}. Stay in character at all times. Your character: ${persona.persona}\n`
+                : '';
+            prompt = prompt.replaceAll('$PERSONA', personaText);
+        }
 
         if (prompt.includes('$STATS')) {
             let stats = await getCommand('!stats').perform(this.agent) + '\n';

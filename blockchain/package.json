@@ -9,9 +9,7 @@
     "faucet": "node scripts/faucet.js",
     "deploy": "node scripts/deploy.js",
     "verify": "node scripts/verify.js",
-    "fund": "node scripts/fund.js",
-    "check": "node scripts/check.js",
-    "test:mock": "node scripts/test-mock.js"
+    "fund": "node scripts/fund.js"
   },
   "dependencies": {
     "@openzeppelin/contracts": "^5.1.0",

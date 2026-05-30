@@ -198,17 +198,21 @@ export function createMindServer(host_public = false, port = 8080) {
         });
 
         socket.on('chat-message', (agentName, json) => {
-            if (!agent_connections[agentName]) {
-                console.warn(`Agent ${agentName} tried to send a message but is not logged in`);
+            const conn = agent_connections[agentName];
+            // conn can exist with a null socket after the target agent disconnects
+            // (see the 'disconnect' handler). Guard against it so a message to a
+            // disconnected agent doesn't crash the whole MindServer.
+            if (!conn || !conn.socket) {
+                console.warn(`Agent ${agentName} is not connected; dropping message from ${curAgentName}.`);
                 return;
             }
             console.log(`${curAgentName} sending message to ${agentName}: ${json.message}`);
-            agent_connections[agentName].socket.emit('chat-message', curAgentName, json);
+            conn.socket.emit('chat-message', curAgentName, json);
         });
 
         socket.on('set-agent-settings', (agentName, settings) => {
             const agent = agent_connections[agentName];
-            if (agent) {
+            if (agent?.socket) {
                 agent.setSettings(settings);
                 agent.socket.emit('restart-agent');
             }
@@ -216,7 +220,11 @@ export function createMindServer(host_public = false, port = 8080) {
 
         socket.on('restart-agent', (agentName) => {
             console.log(`Restarting agent: ${agentName}`);
-            agent_connections[agentName].socket.emit('restart-agent');
+            const conn = agent_connections[agentName];
+            if (conn?.socket)
+                conn.socket.emit('restart-agent');
+            else
+                console.warn(`Cannot restart ${agentName}: not connected.`);
         });
 
         socket.on('stop-agent', (agentName) => {
@@ -256,15 +264,29 @@ export function createMindServer(host_public = false, port = 8080) {
         });
 
 		socket.on('send-message', (agentName, data) => {
-			if (!agent_connections[agentName]) {
-				console.warn(`Agent ${agentName} not in game, cannot send message via MindServer.`);
-                return;
+			// A message starting with the word "all" is broadcast to every connected
+			// agent instead of the single targeted one (the UI sends to one agent at a
+			// time). Each agent then strips the "all" prefix in its own respondFunc.
+			const isBroadcast = typeof data?.message === 'string' && /^\s*all\b/i.test(data.message);
+			const targets = isBroadcast ? Object.keys(agent_connections) : [agentName];
+
+			let delivered = 0;
+			for (const name of targets) {
+				const conn = agent_connections[name];
+				if (!conn || !conn.socket) {
+					if (!isBroadcast)
+						console.warn(`Agent ${name} not in game, cannot send message via MindServer.`);
+					continue;
+				}
+				try {
+					conn.socket.emit('send-message', data);
+					delivered++;
+				} catch (error) {
+					console.error('Error: ', error);
+				}
 			}
-			try {
-                agent_connections[agentName].socket.emit('send-message', data);
-			} catch (error) {
-				console.error('Error: ', error);
-			}
+			if (isBroadcast)
+				console.log(`Broadcast "${data.message}" to ${delivered} agent(s).`);
 		});
 
         socket.on('bot-output', (agentName, message) => {

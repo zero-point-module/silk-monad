@@ -1,0 +1,17 @@
+{
+    "gpt": {
+        "address": "0xe5C41641100b5a5d607C4Dba1dde3DB07AF01002"
+    },
+    "claude": {
+        "address": "0xdCAc1995AD6E069a0665A703A09e8839799FDdC8"
+    },
+    "andy": {
+        "address": "0xd509E3cb6c9eA1E00e9Ca53a6777Ee31477d67F9"
+    },
+    "gpt2": {
+        "address": "0x2E7Ed64c665A4a0Ee6465559BCA164Df53187902"
+    },
+    "claude2": {
+        "address": "0x808d69e9D6b29BBA8EB31b504222a976da4dEC37"
+    }
+}

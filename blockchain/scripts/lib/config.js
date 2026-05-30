@@ -1,7 +1,7 @@
 /**
- * Shared run-time config: loads the root .env + agents.json + tokens.json and
- * exposes the Monad chain, a public client, and per-agent accounts.
- * Not imported by chain.mock.js — the mock stays free of viem and .env.
+ * Config + helpers for the ops scripts (deploy / faucet / fund / verify / setup):
+ * loads the root .env + agents.json + tokens.json and exposes the Monad chain,
+ * a public client, the deployer account, and per-agent accounts.
  */
 import fs from 'node:fs';
 import path from 'node:path';
@@ -12,7 +12,7 @@ import * as chains from 'viem/chains';
 import { privateKeyToAccount } from 'viem/accounts';
 
 /** Repo root — parent of blockchain/, where the shared config lives. */
-export const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
+export const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..', '..');
 
 loadDotenv({ path: path.join(ROOT, '.env') });
 
@@ -43,25 +43,11 @@ export const saveAgents = (doc) => writeJson(AGENTS_PATH, doc);
 export const loadTokens = () => readJson(TOKENS_PATH);
 export const saveTokens = (doc) => writeJson(TOKENS_PATH, doc);
 
-export function getAgent(id) {
-  const agent = loadAgents().agents.find((a) => a.id === id);
-  if (!agent) throw new Error(`Unknown agent id "${id}" — not in agents.json`);
-  return agent;
-}
-
 const normalizePk = (pk) => (pk.startsWith('0x') ? pk : `0x${pk}`);
 
 /** Deployer account — holds the faucet MON, deploys + distributes tokens. */
 export function deployerAccount() {
   const pk = process.env.DEPLOYER_PK;
   if (!pk) throw new Error('DEPLOYER_PK missing in .env — run `npm run setup` first');
-  return privateKeyToAccount(normalizePk(pk));
-}
-
-/** Custodial account for an agent id (env: AGENT_<ID>_PK). */
-export function agentAccount(id) {
-  const envKey = `AGENT_${id.toUpperCase()}_PK`;
-  const pk = process.env[envKey];
-  if (!pk) throw new Error(`${envKey} missing in .env — run \`npm run setup\` first`);
   return privateKeyToAccount(normalizePk(pk));
 }

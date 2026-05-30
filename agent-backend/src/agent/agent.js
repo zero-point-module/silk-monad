@@ -162,9 +162,15 @@ export class Agent {
     /**
      * In a multi-agent public chat, returns the slice of `message` addressed to
      * this agent: the text from this agent's name up to the next agent's name.
-     * Returns null if this agent's name does not appear in the message.
+     * A message starting with the word "all" is addressed to every agent, so we
+     * strip the keyword and return the rest. Returns null if this agent's name
+     * does not appear in the message.
      */
     getDirectedMessage(message) {
+        // "all ..." (also "all, ..." / "all: ...") addresses every agent.
+        const allMatch = message.match(/^\s*all\b[\s,:]*/i);
+        if (allMatch) return message.slice(allMatch[0].length).trim();
+
         const lower = message.toLowerCase();
         const findName = (name, fromIdx = 0) => {
             const escaped = name.toLowerCase().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');

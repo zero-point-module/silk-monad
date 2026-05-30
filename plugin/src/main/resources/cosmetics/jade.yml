@@ -1,0 +1,10 @@
+id: jade
+type: item
+display-name: "<color:#4ade80>JADE</color>"
+item:
+  material: PAPER
+  item-model: silk:jade
+  hide-attributes: true
+  lore:
+    - "<gray>JADE — a tradeable commodity on Monad testnet.</gray>"
+    - "<dark_gray>0x98f6…121863</dark_gray>"

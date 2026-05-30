@@ -1,0 +1,25 @@
+{
+  "providers": [
+    {
+      "type": "bitmap",
+      "file": "silk:item/spice.png",
+      "ascent": 7,
+      "height": 10,
+      "chars": [""]
+    },
+    {
+      "type": "bitmap",
+      "file": "silk:item/silk.png",
+      "ascent": 7,
+      "height": 10,
+      "chars": [""]
+    },
+    {
+      "type": "bitmap",
+      "file": "silk:item/jade.png",
+      "ascent": 7,
+      "height": 10,
+      "chars": [""]
+    }
+  ]
+}

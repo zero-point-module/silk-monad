@@ -55,5 +55,8 @@ data/plugins/SkinsRestorer/recommendations.json
 # SilkMonad runtime data — cosmetic YAMLs live in plugin/src/main/resources/
 data/plugins/SilkMonad/
 
+# Secrets (deployer private key etc.) — NEVER commit
+**/SilkMonad/secrets.yml
+
 # Keep .jar files (Paper server jar + plugin jars) — explicitly not ignored
 !*.jar

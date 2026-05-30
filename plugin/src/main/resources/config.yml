@@ -1,0 +1,5 @@
+chain:
+  rpc-url: "https://testnet-rpc.monad.xyz"
+  chain-id: 10143
+  # The wallet that signs /silk give mints lives in data/plugins/SilkMonad/secrets.yml
+  # (deployer-private-key). Never commit that file.

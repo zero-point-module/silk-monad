@@ -4,6 +4,7 @@ import com.silkmonad.cosmetic.CosmeticRegistry;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.enchantments.Enchantment;
@@ -70,6 +71,15 @@ public final class ItemCosmeticLoader {
             }
             if (itemSection.contains("custom-model-data")) {
                 meta.setCustomModelData(itemSection.getInt("custom-model-data"));
+            }
+            String itemModel = itemSection.getString("item-model");
+            if (itemModel != null && !itemModel.isBlank()) {
+                NamespacedKey modelKey = NamespacedKey.fromString(itemModel);
+                if (modelKey != null) {
+                    meta.setItemModel(modelKey);
+                } else {
+                    plugin.getLogger().warning("Cosmetic " + id + " has invalid item-model: " + itemModel);
+                }
             }
             if (itemSection.getBoolean("unbreakable", false)) {
                 meta.setUnbreakable(true);

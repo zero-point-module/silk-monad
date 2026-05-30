@@ -1,6 +1,7 @@
 {
   "pack": {
-    "pack_format": 46,
+    "pack_format": 63,
+    "supported_formats": [46, 63],
     "description": "silk-monad cosmetics"
   }
 }

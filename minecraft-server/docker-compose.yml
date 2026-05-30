@@ -19,7 +19,7 @@ services:
       RESOURCE_PACK_SHA1: '32e725a731dae4cf81ae66d8ab7e4829ec7e0cd6'
       RESOURCE_PACK_ENFORCE: 'TRUE'
       RESOURCE_PACK_PROMPT: 'silk-monad cosmetics pack'
-      MODRINTH_PROJECTS: 'viaversion,viabackwards,viarewind,skinsrestorer'
+      MODRINTH_PROJECTS: 'viaversion,viabackwards,viarewind,skinsrestorer,fastasyncworldedit'
       MODRINTH_DOWNLOAD_DEPENDENCIES: 'required'
       ENABLE_RCON: 'TRUE'
       RCON_CMDS_STARTUP: |-

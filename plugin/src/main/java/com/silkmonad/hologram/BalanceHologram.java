@@ -1,10 +1,13 @@
 package com.silkmonad.hologram;
 
 import com.silkmonad.chain.Token;
+import com.silkmonad.merchant.Merchant;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
+import net.kyori.adventure.text.format.TextDecoration;
+import org.jetbrains.annotations.Nullable;
 import org.bukkit.entity.Display.Billboard;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.TextDisplay;
@@ -40,9 +43,14 @@ public final class BalanceHologram {
         player.addPassenger(display);
     }
 
-    public void update(List<Token> tokens, Map<String, BigDecimal> balances) {
+    public void update(List<Token> tokens, Map<String, BigDecimal> balances, @Nullable Merchant merchant) {
         Component text = Component.empty();
         boolean first = true;
+        if (merchant != null) {
+            TextColor color = merchant.color() != null ? merchant.color() : NamedTextColor.WHITE;
+            text = text.append(Component.text(merchant.name(), color, TextDecoration.BOLD));
+            first = false;
+        }
         for (Token token : tokens) {
             BigDecimal amount = balances.getOrDefault(token.symbol(), BigDecimal.ZERO);
             if (!first) text = text.append(Component.newline());

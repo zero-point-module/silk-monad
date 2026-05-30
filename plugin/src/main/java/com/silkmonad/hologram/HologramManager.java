@@ -3,6 +3,8 @@ package com.silkmonad.hologram;
 import com.silkmonad.SilkMonadPlugin;
 import com.silkmonad.chain.BalanceFetcher;
 import com.silkmonad.chain.TokenRegistry;
+import com.silkmonad.merchant.Merchant;
+import com.silkmonad.merchant.MerchantRegistry;
 import com.silkmonad.profile.PlayerProfile;
 import com.silkmonad.profile.PlayerProfileStore;
 import org.bukkit.Bukkit;
@@ -18,13 +20,15 @@ public final class HologramManager {
     private final SilkMonadPlugin plugin;
     private final BalanceFetcher fetcher;
     private final TokenRegistry tokens;
+    private final MerchantRegistry merchants;
     private final PlayerProfileStore profiles;
     private final Map<UUID, BalanceHologram> active = new HashMap<>();
 
-    public HologramManager(SilkMonadPlugin plugin, BalanceFetcher fetcher, TokenRegistry tokens, PlayerProfileStore profiles) {
+    public HologramManager(SilkMonadPlugin plugin, BalanceFetcher fetcher, TokenRegistry tokens, MerchantRegistry merchants, PlayerProfileStore profiles) {
         this.plugin = plugin;
         this.fetcher = fetcher;
         this.tokens = tokens;
+        this.merchants = merchants;
         this.profiles = profiles;
     }
 
@@ -48,7 +52,8 @@ public final class HologramManager {
                 h.showError("balance error");
                 return;
             }
-            h.update(tokens.all(), balances);
+            Merchant merchant = merchants.byAddress(profile.wallet());
+            h.update(tokens.all(), balances, merchant);
         }));
     }
 

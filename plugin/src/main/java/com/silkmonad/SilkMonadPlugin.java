@@ -13,6 +13,7 @@ import com.silkmonad.cosmetic.CosmeticRegistry;
 import com.silkmonad.cosmetic.item.ItemCosmeticLoader;
 import com.silkmonad.hologram.HologramManager;
 import com.silkmonad.listeners.PlayerLifecycleListener;
+import com.silkmonad.merchant.MerchantRegistry;
 import com.silkmonad.profile.PlayerProfileStore;
 import org.bukkit.NamespacedKey;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -87,7 +88,8 @@ public final class SilkMonadPlugin extends JavaPlugin {
         BalanceFetcher balanceFetcher = new BalanceFetcher(chain, tokens);
         this.treasury = new Treasury(this, chain, chainId);
         this.profiles = new PlayerProfileStore(this);
-        this.holograms = new HologramManager(this, balanceFetcher, tokens, profiles);
+        MerchantRegistry merchants = new MerchantRegistry(this);
+        this.holograms = new HologramManager(this, balanceFetcher, tokens, merchants, profiles);
 
         // Commands
         this.walletCommand = new WalletCommand(this, profiles, holograms);

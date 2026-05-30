@@ -1,0 +1,15 @@
+# Merchant identities. Mirrors the entries in agents.json at the repo root.
+# Looked up by wallet address (case-insensitive) — when a player's linked
+# wallet matches, the hologram displays their merchant name above the
+# balance lines in the chosen color.
+# This file is OVERWRITTEN from the jar every server start.
+merchants:
+  - name: "Marco the Venetian"
+    address: "0xe5C41641100b5a5d607C4Dba1dde3DB07AF01002"
+    color: "#c084fc"
+  - name: "Aisha of Samarkand"
+    address: "0xdCAc1995AD6E069a0665A703A09e8839799FDdC8"
+    color: "#ff8a4c"
+  - name: "Chen the Jade Merchant"
+    address: "0xd509E3cb6c9eA1E00e9Ca53a6777Ee31477d67F9"
+    color: "#4ade80"

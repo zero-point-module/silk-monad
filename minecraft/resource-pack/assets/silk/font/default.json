@@ -1,35 +1,35 @@
 {
   "providers": [
     {
-      "type": "bitmap",
+      "type": "minecraft:bitmap",
       "file": "silk:item/spice.png",
       "ascent": 7,
       "height": 10,
       "chars": [""]
     },
     {
-      "type": "bitmap",
+      "type": "minecraft:bitmap",
       "file": "silk:item/silk.png",
       "ascent": 7,
       "height": 10,
       "chars": [""]
     },
     {
-      "type": "bitmap",
+      "type": "minecraft:bitmap",
       "file": "silk:item/jade.png",
       "ascent": 7,
       "height": 10,
       "chars": [""]
     },
     {
-      "type": "bitmap",
+      "type": "minecraft:bitmap",
       "file": "silk:gui/panel.png",
       "ascent": 8,
       "height": 48,
       "chars": [""]
     },
     {
-      "type": "space",
+      "type": "minecraft:space",
       "advances": {
         "": -107
       }

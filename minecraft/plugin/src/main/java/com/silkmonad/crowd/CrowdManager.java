@@ -64,6 +64,19 @@ public final class CrowdManager {
             "Hypixel", "thinkofdeath", "C418", "ez"
     };
 
+    /** Display names for the crowd — Silk Road / pan-Eurasian traders, not the
+     *  three featured merchants (Marco/Aisha/Chen) who live in agents.json. */
+    private static final String[] NAME_POOL = {
+            "Tariq", "Layla", "Omar", "Zara", "Mehmet", "Suleiman", "Yasin", "Hasan",
+            "Faruq", "Habib", "Zainab", "Khalil", "Imran", "Saif", "Najib", "Anwar",
+            "Bilal", "Murad", "Saeed", "Talib", "Sina", "Pari", "Mei", "Lin",
+            "Wei", "Xun", "Bao", "Hui", "Ali", "Karim", "Yusuf", "Nadir",
+            "Rashid", "Samir", "Tarek", "Bahram", "Cyrus", "Darius", "Roxana",
+            "Fatima", "Salah", "Idris", "Jamal", "Khaled", "Liu", "Min", "Nasir",
+            "Hamid", "Khadija", "Mansur", "Adina", "Behzad", "Esfir", "Galia", "Hossein",
+            "Ismail", "Jabir", "Kamil", "Mahir", "Nazim", "Othman", "Parisa", "Qasim"
+    };
+
     private final SilkMonadPlugin plugin;
     private final TokenRegistry tokens;
     private final CosmeticRegistry cosmetics;
@@ -111,6 +124,7 @@ public final class CrowdManager {
             data.setCollidable(false);
             data.setType(EntityType.PLAYER);
             data.setTurnToPlayer(false);
+            data.setDisplayName(NAME_POOL[rng.nextInt(NAME_POOL.length)]);
             // Skin lookup hits Mojang; failures shouldn't crash the spawn loop.
             try {
                 data.setSkin(SKIN_POOL[rng.nextInt(SKIN_POOL.length)]);
@@ -376,7 +390,7 @@ public final class CrowdManager {
         Location next = new Location(world, nextX, nextY, nextZ, yaw, 0f);
         m.currentLocation = next;
         m.npc.getData().setLocation(next);
-        m.npc.moveForAll();
+        m.npc.moveForAll(false); // swingArm=false — they were constantly punching the air
     }
 
     private void lookToward(CrowdMember m, Location target) {

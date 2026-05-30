@@ -15,7 +15,7 @@ services:
       SIMULATION_DISTANCE: '6'
       SPAWN_PROTECTION: '0'
       CONNECTION_THROTTLE: '-1'
-      RESOURCE_PACK: 'https://raw.githubusercontent.com/zero-point-module/silk-monad/main/resource-pack/pack.zip'
+      RESOURCE_PACK: 'https://raw.githubusercontent.com/zero-point-module/silk-monad/main/minecraft/resource-pack/pack.zip'
       RESOURCE_PACK_SHA1: '487a5434aaa11f2b3c36e1dbae95a532e2870af5'
       RESOURCE_PACK_ENFORCE: 'TRUE'
       RESOURCE_PACK_PROMPT: 'silk-monad cosmetics pack'

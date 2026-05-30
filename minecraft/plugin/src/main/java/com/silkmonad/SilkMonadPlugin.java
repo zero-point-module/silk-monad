@@ -3,13 +3,17 @@ package com.silkmonad;
 import com.silkmonad.chain.BalanceFetcher;
 import com.silkmonad.chain.ChainClient;
 import com.silkmonad.chain.TokenRegistry;
+import com.silkmonad.chain.TransactionFetcher;
 import com.silkmonad.chain.Treasury;
+import com.silkmonad.commands.CrowdCommand;
 import com.silkmonad.commands.SilkCommand;
 import com.silkmonad.commands.UuidCommand;
 import com.silkmonad.commands.WalletCommand;
+import com.silkmonad.crowd.CrowdManager;
 import com.silkmonad.cosmetic.CosmeticRegistry;
 import com.silkmonad.cosmetic.item.ItemCosmeticLoader;
 import com.silkmonad.hologram.HologramManager;
+import com.silkmonad.listeners.AgentInteractListener;
 import com.silkmonad.listeners.PlayerLifecycleListener;
 import com.silkmonad.merchant.MerchantRegistry;
 import com.silkmonad.profile.PlayerProfileStore;
@@ -31,6 +35,8 @@ public final class SilkMonadPlugin extends JavaPlugin {
     private TokenRegistry tokens;
     private Treasury treasury;
     private WalletCommand walletCommand;
+    private CrowdCommand crowdCommand;
+    private CrowdManager crowdManager;
 
     public static SilkMonadPlugin get() {
         return instance;
@@ -50,6 +56,14 @@ public final class SilkMonadPlugin extends JavaPlugin {
 
     public WalletCommand walletCommand() {
         return walletCommand;
+    }
+
+    public CrowdCommand crowdCommand() {
+        return crowdCommand;
+    }
+
+    public CrowdManager crowdManager() {
+        return crowdManager;
     }
 
     public TokenRegistry tokens() {
@@ -79,13 +93,18 @@ public final class SilkMonadPlugin extends JavaPlugin {
         ChainClient chain = new ChainClient(rpcUrl);
         this.tokens = new TokenRegistry(this);
         BalanceFetcher balanceFetcher = new BalanceFetcher(chain, tokens);
+        TransactionFetcher txFetcher = new TransactionFetcher(chain, tokens);
         this.treasury = new Treasury(this, chain, chainId);
         this.profiles = new PlayerProfileStore(this);
         MerchantRegistry merchants = new MerchantRegistry(this);
         this.holograms = new HologramManager(this, balanceFetcher, tokens, merchants, profiles);
 
+        // Crowd
+        this.crowdManager = new CrowdManager(this, tokens, registry);
+
         // Commands
         this.walletCommand = new WalletCommand(this, profiles, holograms);
+        this.crowdCommand = new CrowdCommand(this);
         getCommand("silk").setExecutor(new SilkCommand(this));
         UuidCommand uuid = new UuidCommand();
         getCommand("uuid").setExecutor(uuid);
@@ -93,6 +112,8 @@ public final class SilkMonadPlugin extends JavaPlugin {
 
         // Listeners
         getServer().getPluginManager().registerEvents(new PlayerLifecycleListener(this, holograms), this);
+        getServer().getPluginManager().registerEvents(
+                new AgentInteractListener(this, tokens, merchants, profiles, balanceFetcher, txFetcher), this);
 
         getLogger().info("Loaded " + registry.size() + " cosmetic(s).");
     }
@@ -100,6 +121,7 @@ public final class SilkMonadPlugin extends JavaPlugin {
     @Override
     public void onDisable() {
         if (holograms != null) holograms.detachAll();
+        if (crowdManager != null) crowdManager.clear();
     }
 
     /**

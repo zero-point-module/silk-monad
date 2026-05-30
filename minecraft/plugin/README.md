@@ -13,7 +13,7 @@ Adding a new cosmetic type (e.g. hat): create `cosmetic/hat/HatCosmetic.java` + 
 
 ## Authoring cosmetics
 
-Drop YAML files under `silk-monad/minecraft-server/data/plugins/SilkMonad/cosmetics/`. Example (`example_sword.yml` ships as default):
+Drop YAML files under `silk-monad/minecraft/server/data/plugins/SilkMonad/cosmetics/`. Example (`example_sword.yml` ships as default):
 
 ```yaml
 id: silk_blade
@@ -49,13 +49,13 @@ No local Java/Gradle required — the build runs in Docker:
 
 ```bash
 ./build.sh             # builds build/libs/silkmonad-plugin-<version>.jar
-./build.sh --install   # also copies into ../minecraft-server/data/plugins/SilkMonad.jar
+./build.sh --install   # also copies into ../server/data/plugins/SilkMonad.jar
 ```
 
 Then restart the server:
 
 ```bash
-(cd ../minecraft-server && docker compose restart minecraft)
+(cd ../server && docker compose restart minecraft)
 ```
 
 ## Resource pack

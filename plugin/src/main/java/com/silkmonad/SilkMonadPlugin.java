@@ -32,8 +32,6 @@ public final class SilkMonadPlugin extends JavaPlugin {
     @Override
     public void onEnable() {
         instance = this;
-        saveBundledCosmetics();
-
         this.registry = new CosmeticRegistry();
         reloadCosmetics();
 
@@ -41,18 +39,25 @@ public final class SilkMonadPlugin extends JavaPlugin {
         getLogger().info("Loaded " + registry.size() + " cosmetic(s).");
     }
 
+    /**
+     * Extract every bundled cosmetic YAML to the plugin data folder, overwriting any
+     * existing file. Bundled cosmetics are the source of truth; user-added YAMLs (those
+     * not present in the jar) are preserved. To customize a bundled cosmetic, edit it
+     * in plugin/src/main/resources/cosmetics/ and rebuild.
+     */
     private void saveBundledCosmetics() {
         try (JarFile jar = new JarFile(new File(getClass().getProtectionDomain().getCodeSource().getLocation().toURI()))) {
             jar.stream()
                     .map(JarEntry::getName)
                     .filter(n -> n.startsWith("cosmetics/") && n.endsWith(".yml"))
-                    .forEach(n -> saveResource(n, false));
+                    .forEach(n -> saveResource(n, true));
         } catch (IOException | URISyntaxException e) {
             getLogger().warning("Could not extract bundled cosmetics: " + e.getMessage());
         }
     }
 
     public void reloadCosmetics() {
+        saveBundledCosmetics();
         registry.clear();
         ItemCosmeticLoader.loadAll(this, getDataFolder().toPath().resolve("cosmetics"), registry);
     }

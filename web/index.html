@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>SILK MONAD — JOIN</title>
+<meta name="description" content="Autonomous AI merchants trading REAL on-chain goods on Monad. Walk in. Watch the caravan deal." />
+
+<!-- Open Graph / social card -->
+<meta property="og:title" content="SILK MONAD — JOIN" />
+<meta property="og:description" content="N autonomous LLM merchants. Real trades. Real on-chain settlement on Monad. gm ser, ape in." />
+<meta property="og:type" content="website" />
+
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐫</text></svg>" />
+
+<!-- pixel + crt fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet" />
+
+<style>
+  :root {
+    --purple: #836EF9;
+    --purple-deep: #5b46d6;
+    --gold: #E8B84B;     /* SPICE */
+    --jade: #3FBF8F;     /* JADE  */
+    --silk: #EFE3CF;     /* SILK  */
+    --bg-0: #0a0814;
+    --bg-1: #160f2e;
+    --bg-2: #241a4d;
+    --wood: #9c6b3f;
+    --wood-dark: #6e4724;
+    --wood-light: #c08b54;
+    --ink: #2a1a0d;
+    --pixel: 'Press Start 2P', monospace;
+    --crt: 'VT323', monospace;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body { height: 100%; }
+
+  body {
+    font-family: var(--crt);
+    color: #fff;
+    background:
+      radial-gradient(120% 90% at 50% -10%, var(--bg-2) 0%, var(--bg-1) 38%, var(--bg-0) 78%);
+    overflow-x: hidden;
+    min-height: 100vh;
+    position: relative;
+    image-rendering: pixelated;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* ---- background decoration ---------------------------------------- */
+
+  /* drifting blocky stars */
+  .stars { position: fixed; inset: 0; z-index: 0; pointer-events: none; opacity: .55; }
+
+  /* particle canvas (floating embers / pixels) */
+  #fx { position: fixed; inset: 0; z-index: 1; pointer-events: none; }
+
+  /* subtle CRT scanlines */
+  .scan {
+    position: fixed; inset: 0; z-index: 6; pointer-events: none;
+    background: repeating-linear-gradient(
+      to bottom, rgba(0,0,0,0) 0 2px, rgba(0,0,0,.16) 2px 4px);
+    mix-blend-mode: overlay; opacity: .5;
+  }
+  .vignette {
+    position: fixed; inset: 0; z-index: 5; pointer-events: none;
+    background: radial-gradient(120% 80% at 50% 40%, transparent 55%, rgba(0,0,0,.6) 100%);
+  }
+
+  /* pixel grass strip at the very bottom */
+  .ground {
+    position: fixed; left: 0; right: 0; bottom: 0; height: 90px; z-index: 2; pointer-events: none;
+    background:
+      linear-gradient(var(--jade) 0 14px, #2f9c72 14px 22px, transparent 22px),
+      repeating-linear-gradient(90deg, #6b4a2a 0 24px, #5c3f24 24px 48px);
+    background-size: 100% 100%, 48px 90px;
+    box-shadow: inset 0 6px 0 rgba(0,0,0,.25), 0 -4px 18px rgba(0,0,0,.4);
+    image-rendering: pixelated;
+  }
+
+  /* ---- layout -------------------------------------------------------- */
+
+  .wrap {
+    position: relative; z-index: 4;
+    min-height: 100vh;
+    display: flex; flex-direction: column; align-items: center;
+    padding: 22px 18px 120px;
+  }
+
+  /* top bar */
+  header {
+    width: 100%; max-width: 1080px;
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 12px; flex-wrap: wrap;
+  }
+  .brand {
+    font-family: var(--pixel); font-size: 13px; letter-spacing: 1px;
+    display: flex; align-items: center; gap: 10px;
+    text-shadow: 2px 2px 0 #000;
+  }
+  .brand .cam { font-size: 22px; filter: drop-shadow(2px 2px 0 #000); }
+  .brand b { color: var(--purple); }
+  nav { display: flex; gap: 10px; }
+  nav a {
+    font-family: var(--pixel); font-size: 9px; color: #cfc6ff; text-decoration: none;
+    border: 2px solid #3a2f63; background: #181233; padding: 8px 10px;
+    box-shadow: 3px 3px 0 #000; transition: transform .08s, background .15s;
+  }
+  nav a:hover { background: var(--purple-deep); transform: translate(-1px,-1px); box-shadow: 4px 4px 0 #000; }
+  nav a:active { transform: translate(2px,2px); box-shadow: 1px 1px 0 #000; }
+
+  /* hero copy */
+  .kicker {
+    margin-top: 46px; font-family: var(--pixel); font-size: 10px; color: var(--gold);
+    letter-spacing: 2px; text-shadow: 2px 2px 0 #000; text-align: center;
+    animation: flickerText 6s infinite;
+  }
+  @keyframes flickerText { 0%,97%,100%{opacity:1} 98%{opacity:.4} }
+
+  /* ---- the hanging sign --------------------------------------------- */
+
+  .rig { margin-top: 26px; display: flex; flex-direction: column; align-items: center; }
+
+  /* the support bar the sign hangs from */
+  .bar {
+    width: 360px; max-width: 86vw; height: 16px;
+    background: linear-gradient(var(--wood-light), var(--wood) 50%, var(--wood-dark));
+    border: 3px solid var(--ink);
+    box-shadow: 4px 4px 0 rgba(0,0,0,.5);
+    position: relative; z-index: 2;
+  }
+  .bar::before, .bar::after {
+    /* little end caps */
+    content: ''; position: absolute; top: -6px; width: 16px; height: 28px;
+    background: var(--wood-dark); border: 3px solid var(--ink);
+  }
+  .bar::before { left: -14px; } .bar::after { right: -14px; }
+
+  .swing {
+    transform-origin: top center;
+    animation: sway 4.2s ease-in-out infinite;
+    display: flex; flex-direction: column; align-items: center;
+  }
+  @keyframes sway {
+    0%,100% { transform: rotate(-2.4deg); }
+    50%     { transform: rotate(2.4deg); }
+  }
+
+  .chains { display: flex; gap: 150px; height: 30px; }
+  .chains i {
+    width: 6px; height: 30px; display: block;
+    background: repeating-linear-gradient(#d7d2e6 0 4px, #8a85a3 4px 8px);
+    box-shadow: 2px 0 0 rgba(0,0,0,.4);
+  }
+
+  /* the wooden sign board */
+  .sign {
+    position: relative;
+    width: 420px; max-width: 90vw;
+    padding: 30px 26px 26px;
+    background:
+      repeating-linear-gradient(90deg, var(--wood) 0 22px, var(--wood-dark) 22px 24px),
+      linear-gradient(var(--wood-light), var(--wood));
+    border: 5px solid var(--ink);
+    box-shadow:
+      inset 0 0 0 3px rgba(255,255,255,.08),
+      inset 0 0 30px rgba(0,0,0,.35),
+      8px 10px 0 rgba(0,0,0,.55);
+    text-align: center;
+  }
+  /* corner "nails" */
+  .sign::before, .sign::after,
+  .sign .nail-l, .sign .nail-r {
+    content: ''; position: absolute; width: 9px; height: 9px;
+    background: #d9d4e6; border: 2px solid #000; border-radius: 1px;
+  }
+  .sign::before { top: 8px; left: 8px; }
+  .sign::after  { top: 8px; right: 8px; }
+  .sign .nail-l { bottom: 8px; left: 8px; }
+  .sign .nail-r { bottom: 8px; right: 8px; }
+
+  .join {
+    font-family: var(--pixel);
+    font-size: 56px; line-height: 1; letter-spacing: 4px;
+    color: #ffce4a;
+    text-shadow:
+      3px 3px 0 #7a3f0a, 6px 6px 0 #000,
+      0 0 18px rgba(255,206,74,.65);
+    animation: pulseGlow 2.4s ease-in-out infinite;
+  }
+  @keyframes pulseGlow {
+    0%,100% { text-shadow: 3px 3px 0 #7a3f0a, 6px 6px 0 #000, 0 0 14px rgba(255,206,74,.45); }
+    50%     { text-shadow: 3px 3px 0 #7a3f0a, 6px 6px 0 #000, 0 0 30px rgba(255,206,74,.95); }
+  }
+  .sub {
+    margin-top: 12px; font-size: 22px; color: #f3e7cf;
+    letter-spacing: 1px; text-shadow: 2px 2px 0 rgba(0,0,0,.5);
+  }
+
+  /* IP pill + copy */
+  .ipline { margin-top: 18px; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+  .ip {
+    display: inline-flex; align-items: center; gap: 12px;
+    font-family: var(--pixel); font-size: 16px;
+    background: #120c26; color: #9ff5cf;
+    border: 3px solid var(--jade);
+    padding: 12px 16px; cursor: pointer;
+    box-shadow: 4px 4px 0 #000, inset 0 0 14px rgba(63,191,143,.25);
+    transition: transform .08s, background .15s;
+    user-select: all;
+  }
+  .ip:hover { background: #16113a; transform: translate(-1px,-1px); }
+  .ip:active { transform: translate(2px,2px); box-shadow: 1px 1px 0 #000; }
+  .ip .copy { font-size: 9px; color: var(--jade); border-left: 2px solid #2c5a47; padding-left: 12px; }
+  .ip.copied { border-color: var(--gold); color: var(--gold); }
+  .ip.copied .copy { color: var(--gold); border-left-color: #6e561f; }
+  .meta { font-family: var(--pixel); font-size: 8px; color: #b9aee8; letter-spacing: 1px; opacity: .85; }
+  .meta b { color: var(--jade); }
+
+  /* degen ticker marquee */
+  .ticker {
+    margin-top: 40px; width: 100%; max-width: 1080px;
+    border-top: 3px solid #2c2350; border-bottom: 3px solid #2c2350;
+    background: #0d0922; overflow: hidden; white-space: nowrap;
+  }
+  .ticker .run {
+    display: inline-block; padding: 12px 0;
+    font-family: var(--pixel); font-size: 11px; color: var(--purple);
+    animation: marquee 22s linear infinite;
+  }
+  .ticker .run span { margin: 0 26px; }
+  .ticker .run .g { color: var(--gold); }
+  .ticker .run .j { color: var(--jade); }
+  .ticker .run .s { color: var(--silk); }
+  @keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+
+  /* token badges + cast */
+  .grid {
+    margin-top: 34px; width: 100%; max-width: 880px;
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px;
+  }
+  .card {
+    border: 3px solid #2f2657; background: #140e30;
+    padding: 16px 14px; text-align: center;
+    box-shadow: 5px 5px 0 rgba(0,0,0,.45);
+  }
+  .card .blk {
+    width: 30px; height: 30px; margin: 0 auto 10px;
+    border: 3px solid #000; box-shadow: inset 0 0 0 2px rgba(255,255,255,.15);
+  }
+  .card.spice .blk { background: var(--gold); }
+  .card.silk  .blk { background: var(--silk); }
+  .card.jade  .blk { background: var(--jade); }
+  .card h3 { font-family: var(--pixel); font-size: 11px; letter-spacing: 1px; }
+  .card.spice h3 { color: var(--gold); } .card.silk h3 { color: var(--silk); } .card.jade h3 { color: var(--jade); }
+  .card p { margin-top: 8px; font-size: 17px; color: #c9c1ec; }
+
+  .pitch {
+    margin-top: 34px; max-width: 760px; text-align: center;
+    font-size: 22px; line-height: 1.45; color: #ded6ff;
+  }
+  .pitch b { color: var(--purple); }
+  .pitch .hot { color: var(--gold); }
+
+  .cast {
+    margin-top: 14px; font-family: var(--pixel); font-size: 8px;
+    color: #8d83bf; letter-spacing: 1px; text-align: center;
+  }
+
+  footer {
+    margin-top: 40px; font-family: var(--pixel); font-size: 8px;
+    color: #6f659c; text-align: center; letter-spacing: 1px; line-height: 2;
+  }
+  footer a { color: var(--purple); text-decoration: none; }
+  footer a:hover { color: var(--gold); }
+
+  /* copied toast */
+  .toast {
+    position: fixed; left: 50%; bottom: 120px; transform: translateX(-50%) translateY(20px);
+    font-family: var(--pixel); font-size: 10px; color: #0a0814; background: var(--gold);
+    border: 3px solid #000; padding: 12px 16px; box-shadow: 5px 5px 0 #000;
+    opacity: 0; pointer-events: none; transition: opacity .2s, transform .2s; z-index: 20;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  @media (max-width: 520px) {
+    .join { font-size: 40px; }
+    .chains { gap: 110px; }
+    .grid { grid-template-columns: 1fr; }
+    .kicker { margin-top: 30px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .swing, .join, .ticker .run, .kicker { animation: none !important; }
+  }
+</style>
+</head>
+<body>
+
+<canvas class="stars"></canvas>
+<canvas id="fx"></canvas>
+
+<div class="wrap">
+  <header>
+    <div class="brand"><span class="cam">🐫</span> SILK&nbsp;<b>MONAD</b></div>
+    <nav>
+      <a href="https://github.com/zero-point-module/silk-monad" target="_blank" rel="noopener">GITHUB</a>
+      <a href="https://monad.xyz" target="_blank" rel="noopener">MONAD</a>
+    </nav>
+  </header>
+
+  <div class="kicker">▒ AUTONOMOUS AI MERCHANTS · REAL ON-CHAIN TRADES ▒</div>
+
+  <!-- the swinging join sign -->
+  <div class="rig">
+    <div class="bar"></div>
+    <div class="swing">
+      <div class="chains"><i></i><i></i></div>
+      <div class="sign">
+        <span class="nail-l"></span><span class="nail-r"></span>
+        <div class="join">JOIN</div>
+        <div class="sub">the caravan</div>
+
+        <div class="ipline">
+          <button class="ip" id="ip" title="Click to copy">
+            <span id="ipText">203.0.113.7</span>
+            <span class="copy" id="copyLabel">COPY</span>
+          </button>
+          <div class="meta">JAVA · <b>1.21.6</b> · CRACKED · ANY VERSION (VIAVERSION)</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- degen ticker -->
+  <div class="ticker">
+    <div class="run" id="run">
+      <span class="g">SPICE ▲</span><span class="s">SILK ▲</span><span class="j">JADE ▲</span>
+      <span>gm ser</span><span>REAL TXNS ON MONAD</span><span>~1s FINALITY</span>
+      <span>the agents are trading without you</span><span class="g">APE IN</span>
+      <span>wagmi</span><span>10,000 TPS</span><span>micro-trades, on-chain, unironically</span>
+    </div>
+  </div>
+
+  <!-- tokenized goods -->
+  <div class="grid">
+    <div class="card spice"><div class="blk"></div><h3>$SPICE</h3><p>cinnamon &amp; pepper.<br/>worth a war.</p></div>
+    <div class="card silk"><div class="blk"></div><h3>$SILK</h3><p>woven thread.<br/>soft, scarce, settled.</p></div>
+    <div class="card jade"><div class="blk"></div><h3>$JADE</h3><p>green stone.<br/>chen won't sell.</p></div>
+  </div>
+
+  <p class="pitch">
+    A caravan of <b>fully autonomous LLM merchants</b> walks an ancient trade route rebuilt in Minecraft.
+    They haggle in chat, strike deals, and when two agree on a price — <span class="hot">they settle it as a real ERC-20 transaction on Monad testnet.</span>
+    Walk in. Watch the deals land on-chain.
+  </p>
+  <div class="cast">★ MARCO THE VENETIAN · AISHA OF SAMARKAND · CHEN THE JADE MERCHANT ★</div>
+
+  <footer>
+    BUILT ON <a href="https://monad.xyz" target="_blank" rel="noopener">MONAD TESTNET</a>
+    · AGENTS BY <a href="https://github.com/mindcraft-ce/mindcraft-ce" target="_blank" rel="noopener">MINDCRAFT-CE</a><br/>
+    🐫 SILK MONAD — A HACKATHON CARAVAN
+  </footer>
+</div>
+
+<div class="toast" id="toast">COPIED — gg, now connect ✦</div>
+<div class="scan"></div>
+<div class="vignette"></div>
+<div class="ground"></div>
+
+<script>
+/* ───────────────────────────────────────────────────────────────────────
+   SERVER ADDRESS — set this to your public Minecraft host.
+   Quick demo override: append ?ip=1.2.3.4:25565 to the URL.
+   ─────────────────────────────────────────────────────────────────────── */
+const SERVER_IP = "203.0.113.7";
+
+const ip = new URLSearchParams(location.search).get("ip") || SERVER_IP;
+document.getElementById("ipText").textContent = ip;
+
+/* copy-to-clipboard with feedback */
+const ipBtn = document.getElementById("ip");
+const copyLabel = document.getElementById("copyLabel");
+const toast = document.getElementById("toast");
+let toastTimer;
+
+ipBtn.addEventListener("click", async () => {
+  try {
+    await navigator.clipboard.writeText(ip);
+  } catch {
+    const r = document.createRange(); r.selectNode(document.getElementById("ipText"));
+    getSelection().removeAllRanges(); getSelection().addRange(r);
+    try { document.execCommand("copy"); } catch {}
+    getSelection().removeAllRanges();
+  }
+  ipBtn.classList.add("copied");
+  copyLabel.textContent = "✓ OK";
+  toast.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => {
+    toast.classList.remove("show");
+    ipBtn.classList.remove("copied");
+    copyLabel.textContent = "COPY";
+  }, 1600);
+});
+
+/* ── blocky starfield ─────────────────────────────────────────────────── */
+(function stars() {
+  const c = document.querySelector(".stars"), x = c.getContext("2d");
+  let pts = [];
+  function size() {
+    c.width = innerWidth; c.height = innerHeight;
+    const n = Math.round((innerWidth * innerHeight) / 14000);
+    pts = Array.from({ length: n }, (_, i) => ({
+      x: (i * 73 % innerWidth),
+      y: (i * 131 % innerHeight) * 0.7,
+      s: 1 + (i % 3),
+      a: 0.2 + (i % 5) / 6,
+      tw: (i % 7) / 7
+    }));
+  }
+  size(); addEventListener("resize", size);
+  let t = 0;
+  (function loop() {
+    t += 0.02; x.clearRect(0, 0, c.width, c.height);
+    for (const p of pts) {
+      const tw = 0.6 + 0.4 * Math.sin(t + p.tw * 6.28);
+      x.fillStyle = `rgba(177,160,255,${p.a * tw})`;
+      x.fillRect(p.x, p.y, p.s, p.s);
+    }
+    requestAnimationFrame(loop);
+  })();
+})();
+
+/* ── floating pixel embers (monad purple / spice gold / jade) ─────────── */
+(function fx() {
+  const c = document.getElementById("fx"), x = c.getContext("2d");
+  const colors = ["#836EF9", "#E8B84B", "#3FBF8F", "#EFE3CF"];
+  let parts = [];
+  function size() {
+    c.width = innerWidth; c.height = innerHeight;
+    const n = Math.min(70, Math.round(innerWidth / 22));
+    parts = Array.from({ length: n }, (_, i) => spawn(i));
+  }
+  function spawn(i) {
+    return {
+      x: (i * 97) % Math.max(1, innerWidth),
+      y: innerHeight + (i * 53) % innerHeight,
+      s: 2 + (i % 3) * 2,
+      vy: 0.25 + (i % 5) / 9,
+      vx: ((i % 7) - 3) / 22,
+      c: colors[i % colors.length],
+      sw: (i % 9) / 9
+    };
+  }
+  size(); addEventListener("resize", size);
+  let t = 0;
+  (function loop() {
+    t += 0.016; x.clearRect(0, 0, c.width, c.height);
+    for (const p of parts) {
+      p.y -= p.vy; p.x += p.vx + Math.sin(t + p.sw * 6.28) * 0.25;
+      if (p.y < -8) { p.y = innerHeight + 8; p.x = (p.x + 137) % innerWidth; }
+      x.globalAlpha = 0.55;
+      x.fillStyle = p.c;
+      x.fillRect(p.x | 0, p.y | 0, p.s, p.s);
+    }
+    x.globalAlpha = 1;
+    requestAnimationFrame(loop);
+  })();
+})();
+</script>
+</body>
+</html>

@@ -19,6 +19,11 @@ export class Claude {
 
     async sendRequest(turns, systemMessage) {
         const messages = strictFormat(turns);
+        // Some Claude models (e.g. Opus 4.x) don't support assistant message
+        // prefill, so the conversation must end with a user message.
+        if (messages.length > 0 && messages[messages.length - 1].role !== 'user') {
+            messages.push({ role: 'user', content: '_' });
+        }
         let res = null;
         try {
             console.log(`Awaiting anthropic response from ${this.model_name}...`)

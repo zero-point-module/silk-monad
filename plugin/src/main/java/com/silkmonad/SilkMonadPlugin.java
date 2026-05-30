@@ -4,8 +4,6 @@ import com.silkmonad.chain.BalanceFetcher;
 import com.silkmonad.chain.ChainClient;
 import com.silkmonad.chain.TokenRegistry;
 import com.silkmonad.chain.Treasury;
-import com.silkmonad.chat.ChatFormatter;
-import com.silkmonad.commands.ProfileCommand;
 import com.silkmonad.commands.SilkCommand;
 import com.silkmonad.commands.UuidCommand;
 import com.silkmonad.commands.WalletCommand;
@@ -33,7 +31,6 @@ public final class SilkMonadPlugin extends JavaPlugin {
     private TokenRegistry tokens;
     private Treasury treasury;
     private WalletCommand walletCommand;
-    private ProfileCommand profileCommand;
 
     public static SilkMonadPlugin get() {
         return instance;
@@ -53,10 +50,6 @@ public final class SilkMonadPlugin extends JavaPlugin {
 
     public WalletCommand walletCommand() {
         return walletCommand;
-    }
-
-    public ProfileCommand profileCommand() {
-        return profileCommand;
     }
 
     public TokenRegistry tokens() {
@@ -93,7 +86,6 @@ public final class SilkMonadPlugin extends JavaPlugin {
 
         // Commands
         this.walletCommand = new WalletCommand(this, profiles, holograms);
-        this.profileCommand = new ProfileCommand(profiles);
         getCommand("silk").setExecutor(new SilkCommand(this));
         UuidCommand uuid = new UuidCommand();
         getCommand("uuid").setExecutor(uuid);
@@ -101,7 +93,6 @@ public final class SilkMonadPlugin extends JavaPlugin {
 
         // Listeners
         getServer().getPluginManager().registerEvents(new PlayerLifecycleListener(this, holograms), this);
-        getServer().getPluginManager().registerEvents(new ChatFormatter(profiles), this);
 
         getLogger().info("Loaded " + registry.size() + " cosmetic(s).");
     }

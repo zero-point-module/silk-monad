@@ -58,7 +58,6 @@ public final class SilkCommand implements CommandExecutor, TabCompleter {
             case "give", "apply" -> handleApply(sender, args);
             case "remove" -> handleRemove(sender, args);
             case "wallet" -> plugin.walletCommand().handle(sender, rest);
-            case "color" -> plugin.profileCommand().handle(sender, rest);
             default -> sender.sendMessage(Component.text("Unknown subcommand: " + sub, NamedTextColor.RED));
         }
         return true;
@@ -185,16 +184,13 @@ public final class SilkCommand implements CommandExecutor, TabCompleter {
     @Override
     public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
         if (args.length == 1) {
-            return filter(Arrays.asList("give", "apply", "remove", "list", "reload", "wallet", "color"), args[0]);
+            return filter(Arrays.asList("give", "apply", "remove", "list", "reload", "wallet"), args[0]);
         }
         if (args.length == 2 && (args[0].equalsIgnoreCase("give") || args[0].equalsIgnoreCase("apply") || args[0].equalsIgnoreCase("remove"))) {
             return filter(plugin.registry().all().stream().map(Cosmetic::id).toList(), args[1]);
         }
         if (args.length == 2 && args[0].equalsIgnoreCase("wallet")) {
             return filter(Arrays.asList("set", "clear", "show", "refresh"), args[1]);
-        }
-        if (args.length == 2 && args[0].equalsIgnoreCase("color")) {
-            return filter(Arrays.asList("set", "clear"), args[1]);
         }
         if (args.length == 3) {
             return filter(Bukkit.getOnlinePlayers().stream().map(Player::getName).toList(), args[2]);

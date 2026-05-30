@@ -18,9 +18,6 @@ commands:
       /silk wallet clear [player]
       /silk wallet show [player]
       /silk wallet refresh [player]
-      /silk color set <#hex|named>
-      /silk color set <player> <#hex|named>
-      /silk color clear [player]
     permission: silkmonad.use
   uuid:
     description: Print the UUID of a past-connected player
@@ -42,9 +39,3 @@ permissions:
   silkmonad.wallet.show:
     description: Show any player's linked wallet
     default: true
-  silkmonad.profile.self:
-    description: Set your own chat color
-    default: true
-  silkmonad.profile.others:
-    description: Set another player's chat color
-    default: op

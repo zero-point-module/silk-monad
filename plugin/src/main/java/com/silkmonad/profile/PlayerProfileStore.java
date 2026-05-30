@@ -1,10 +1,8 @@
 package com.silkmonad.profile;
 
-import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.io.IOException;
@@ -51,9 +49,7 @@ public final class PlayerProfileStore {
             ConfigurationSection s = root.getConfigurationSection(key);
             if (s == null) continue;
             String wallet = s.getString("wallet");
-            TextColor color = parseColor(s.getString("chat-color"));
-            boolean bold = s.getBoolean("chat-bold", true);
-            profiles.put(uuid, new PlayerProfile(wallet, color, bold));
+            profiles.put(uuid, new PlayerProfile(wallet));
         }
     }
 
@@ -63,8 +59,6 @@ public final class PlayerProfileStore {
             PlayerProfile p = e.getValue();
             String base = "players." + e.getKey();
             if (p.wallet() != null) cfg.set(base + ".wallet", p.wallet());
-            if (p.chatColor() != null) cfg.set(base + ".chat-color", p.chatColor().asHexString());
-            cfg.set(base + ".chat-bold", p.chatBold());
         }
         try {
             if (!file.getParentFile().exists()) file.getParentFile().mkdirs();
@@ -72,11 +66,5 @@ public final class PlayerProfileStore {
         } catch (IOException ex) {
             plugin.getLogger().severe("Failed to save players.yml: " + ex.getMessage());
         }
-    }
-
-    @Nullable
-    private static TextColor parseColor(@Nullable String raw) {
-        if (raw == null) return null;
-        return TextColor.fromHexString(raw.startsWith("#") ? raw : "#" + raw);
     }
 }

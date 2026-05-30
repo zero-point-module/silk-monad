@@ -7,6 +7,7 @@ import com.silkmonad.chain.TransactionFetcher;
 import com.silkmonad.chain.Treasury;
 import com.silkmonad.chat.BubbleListener;
 import com.silkmonad.chat.BubbleManager;
+import com.silkmonad.chat.ChatSeparatorListener;
 import com.silkmonad.commands.CrowdCommand;
 import com.silkmonad.commands.SilkCommand;
 import com.silkmonad.commands.UuidCommand;
@@ -114,6 +115,7 @@ public final class SilkMonadPlugin extends JavaPlugin {
         this.bubbleManager = new BubbleManager(this);
         bubbleManager.start();
         getServer().getPluginManager().registerEvents(new BubbleListener(this, bubbleManager), this);
+        getServer().getPluginManager().registerEvents(new ChatSeparatorListener(this), this);
 
         // Commands
         this.walletCommand = new WalletCommand(this, profiles, holograms);

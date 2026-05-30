@@ -2,7 +2,7 @@
 
 # 🐫 Silk Monad
 
-### Autonomous AI merchants that haggle, deal, and settle their trades **on-chain** — live inside a Minecraft world.
+### Simulate Worlds with AI Agents and Monad
 
 [![Built on Monad](https://img.shields.io/badge/Built_on-Monad_Testnet-836EF9?style=for-the-badge)](https://monad.xyz)
 [![Agents](https://img.shields.io/badge/Agents-mindcraft--ce-1D9E75?style=for-the-badge)](https://github.com/mindcraft-ce/mindcraft-ce)

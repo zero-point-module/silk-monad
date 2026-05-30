@@ -3,6 +3,7 @@ package com.silkmonad;
 import com.silkmonad.chain.BalanceFetcher;
 import com.silkmonad.chain.ChainClient;
 import com.silkmonad.chain.TokenRegistry;
+import com.silkmonad.chain.Treasury;
 import com.silkmonad.chat.ChatFormatter;
 import com.silkmonad.commands.ProfileCommand;
 import com.silkmonad.commands.SilkCommand;
@@ -28,6 +29,8 @@ public final class SilkMonadPlugin extends JavaPlugin {
     private CosmeticRegistry registry;
     private PlayerProfileStore profiles;
     private HologramManager holograms;
+    private TokenRegistry tokens;
+    private Treasury treasury;
     private WalletCommand walletCommand;
     private ProfileCommand profileCommand;
 
@@ -55,6 +58,14 @@ public final class SilkMonadPlugin extends JavaPlugin {
         return profileCommand;
     }
 
+    public TokenRegistry tokens() {
+        return tokens;
+    }
+
+    public Treasury treasury() {
+        return treasury;
+    }
+
     public NamespacedKey key(String name) {
         return new NamespacedKey(this, name);
     }
@@ -68,11 +79,13 @@ public final class SilkMonadPlugin extends JavaPlugin {
         this.registry = new CosmeticRegistry();
         reloadCosmetics();
 
-        // Chain + holograms
+        // Chain + holograms + treasury
         String rpcUrl = getConfig().getString("chain.rpc-url", "https://testnet-rpc.monad.xyz");
+        long chainId = getConfig().getLong("chain.chain-id", 10143L);
         ChainClient chain = new ChainClient(rpcUrl);
-        TokenRegistry tokens = new TokenRegistry(this);
+        this.tokens = new TokenRegistry(this);
         BalanceFetcher balanceFetcher = new BalanceFetcher(chain, tokens);
+        this.treasury = new Treasury(this, chain, chainId);
         this.profiles = new PlayerProfileStore(this);
         this.holograms = new HologramManager(this, balanceFetcher, tokens, profiles);
 

@@ -41,4 +41,9 @@ public final class TokenRegistry {
     public List<Token> all() {
         return Collections.unmodifiableList(tokens);
     }
+
+    public java.util.Optional<Token> bySymbol(String symbol) {
+        String s = symbol.toUpperCase(java.util.Locale.ROOT);
+        return tokens.stream().filter(t -> t.symbol().equalsIgnoreCase(s)).findFirst();
+    }
 }

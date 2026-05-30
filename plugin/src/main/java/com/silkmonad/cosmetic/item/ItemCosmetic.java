@@ -38,6 +38,13 @@ public final class ItemCosmetic implements Cosmetic {
         return template.clone();
     }
 
+    public ItemStack newStack(int amount) {
+        ItemStack s = template.clone();
+        int max = s.getMaxStackSize();
+        s.setAmount(Math.max(1, Math.min(amount, max)));
+        return s;
+    }
+
     @Override
     public @NotNull String id() {
         return id;

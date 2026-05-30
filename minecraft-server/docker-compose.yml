@@ -1,0 +1,32 @@
+services:
+  minecraft:
+    image: itzg/minecraft-server:java21
+    container_name: minecraft-paper
+    ports:
+      - "25565:25565"
+    environment:
+      EULA: "TRUE"
+      TYPE: "PAPER"
+      VERSION: "1.21.6"
+      MEMORY: "2G"
+      TZ: "UTC"
+      ONLINE_MODE: "FALSE"
+      VIEW_DISTANCE: "6"
+      SIMULATION_DISTANCE: "6"
+      SPAWN_PROTECTION: "0"
+      MODRINTH_PROJECTS: "viaversion"
+      MODRINTH_DOWNLOAD_DEPENDENCIES: "required"
+      ENABLE_RCON: "TRUE"
+      RCON_CMDS_STARTUP: |-
+        gamerule doDaylightCycle false
+        gamerule doWeatherCycle false
+        gamerule doFireTick false
+        gamerule randomTickSpeed 0
+        gamerule mobGriefing false
+        time set noon
+        weather clear 1000000
+    tty: true
+    stdin_open: true
+    restart: unless-stopped
+    volumes:
+      - ./data:/data

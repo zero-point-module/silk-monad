@@ -6,15 +6,45 @@ description: Custom cosmetics framework for the silk-monad server
 authors: [silk-monad]
 commands:
   silk:
-    description: SilkMonad cosmetics root command
+    description: SilkMonad root command
     usage: |
       /silk give <cosmetic-id> [player]
       /silk apply <cosmetic-id> [player]
       /silk remove <cosmetic-id> [player]
       /silk list [type]
       /silk reload
+      /silk wallet set <0x...>
+      /silk wallet set <player> <0x...>
+      /silk wallet clear [player]
+      /silk wallet show [player]
+      /silk wallet refresh [player]
+      /silk color set <#hex|named>
+      /silk color set <player> <#hex|named>
+      /silk color clear [player]
     permission: silkmonad.use
+  uuid:
+    description: Print the UUID of a past-connected player
+    usage: /uuid <player>
+    permission: silkmonad.uuid
 permissions:
   silkmonad.use:
     description: Use SilkMonad commands
+    default: true
+  silkmonad.uuid:
+    description: Use /uuid to look up UUIDs
+    default: op
+  silkmonad.wallet.self:
+    description: Link your own Monad wallet
+    default: true
+  silkmonad.wallet.others:
+    description: Link or clear another player's Monad wallet
+    default: op
+  silkmonad.wallet.show:
+    description: Show any player's linked wallet
+    default: true
+  silkmonad.profile.self:
+    description: Set your own chat color
+    default: true
+  silkmonad.profile.others:
+    description: Set another player's chat color
     default: op

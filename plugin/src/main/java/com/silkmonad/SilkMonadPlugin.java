@@ -1,8 +1,18 @@
 package com.silkmonad;
 
+import com.silkmonad.chain.BalanceFetcher;
+import com.silkmonad.chain.ChainClient;
+import com.silkmonad.chain.TokenRegistry;
+import com.silkmonad.chat.ChatFormatter;
+import com.silkmonad.commands.ProfileCommand;
 import com.silkmonad.commands.SilkCommand;
+import com.silkmonad.commands.UuidCommand;
+import com.silkmonad.commands.WalletCommand;
 import com.silkmonad.cosmetic.CosmeticRegistry;
 import com.silkmonad.cosmetic.item.ItemCosmeticLoader;
+import com.silkmonad.hologram.HologramManager;
+import com.silkmonad.listeners.PlayerLifecycleListener;
+import com.silkmonad.profile.PlayerProfileStore;
 import org.bukkit.NamespacedKey;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -16,6 +26,10 @@ public final class SilkMonadPlugin extends JavaPlugin {
 
     private static SilkMonadPlugin instance;
     private CosmeticRegistry registry;
+    private PlayerProfileStore profiles;
+    private HologramManager holograms;
+    private WalletCommand walletCommand;
+    private ProfileCommand profileCommand;
 
     public static SilkMonadPlugin get() {
         return instance;
@@ -25,6 +39,22 @@ public final class SilkMonadPlugin extends JavaPlugin {
         return registry;
     }
 
+    public PlayerProfileStore profiles() {
+        return profiles;
+    }
+
+    public HologramManager holograms() {
+        return holograms;
+    }
+
+    public WalletCommand walletCommand() {
+        return walletCommand;
+    }
+
+    public ProfileCommand profileCommand() {
+        return profileCommand;
+    }
+
     public NamespacedKey key(String name) {
         return new NamespacedKey(this, name);
     }
@@ -32,11 +62,38 @@ public final class SilkMonadPlugin extends JavaPlugin {
     @Override
     public void onEnable() {
         instance = this;
+        saveDefaultConfig();
+
+        // Cosmetics
         this.registry = new CosmeticRegistry();
         reloadCosmetics();
 
+        // Chain + holograms
+        String rpcUrl = getConfig().getString("chain.rpc-url", "https://testnet-rpc.monad.xyz");
+        ChainClient chain = new ChainClient(rpcUrl);
+        TokenRegistry tokens = new TokenRegistry(this);
+        BalanceFetcher balanceFetcher = new BalanceFetcher(chain, tokens);
+        this.profiles = new PlayerProfileStore(this);
+        this.holograms = new HologramManager(this, balanceFetcher, tokens, profiles);
+
+        // Commands
+        this.walletCommand = new WalletCommand(this, profiles, holograms);
+        this.profileCommand = new ProfileCommand(profiles);
         getCommand("silk").setExecutor(new SilkCommand(this));
+        UuidCommand uuid = new UuidCommand();
+        getCommand("uuid").setExecutor(uuid);
+        getCommand("uuid").setTabCompleter(uuid);
+
+        // Listeners
+        getServer().getPluginManager().registerEvents(new PlayerLifecycleListener(this, holograms), this);
+        getServer().getPluginManager().registerEvents(new ChatFormatter(profiles), this);
+
         getLogger().info("Loaded " + registry.size() + " cosmetic(s).");
+    }
+
+    @Override
+    public void onDisable() {
+        if (holograms != null) holograms.detachAll();
     }
 
     /**

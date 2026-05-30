@@ -1,0 +1,23 @@
+# Tracked ERC20s on Monad testnet (chain id 10143).
+# Source of truth: silk-monad/tokens.json at the repo root. Sync manually on redeploy.
+# This file is OVERWRITTEN from the jar every server start.
+#
+# glyph: Unicode codepoint (U+E001..) mapped in the resource pack's font/default.json
+#        to the token's PNG. Rendered as an icon in the balance hologram.
+# color: hex color used for the SYMBOL text in the hologram and elsewhere.
+tokens:
+  - symbol: SPICE
+    address: "0x7a2ca0bbe427f246cd00ebd58178185e99bb71d1"
+    decimals: 18
+    glyph: ""
+    color: "#ff8a4c"
+  - symbol: SILK
+    address: "0x4c8804629fe685e7d442a4d7e2bdc019236b7a9f"
+    decimals: 18
+    glyph: ""
+    color: "#c084fc"
+  - symbol: JADE
+    address: "0x98f64e27a64d24b7a95e435fe023f1ad4a121863"
+    decimals: 18
+    glyph: ""
+    color: "#4ade80"

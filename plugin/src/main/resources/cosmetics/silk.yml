@@ -1,0 +1,10 @@
+id: silk
+type: item
+display-name: "<color:#c084fc>SILK</color>"
+item:
+  material: PAPER
+  item-model: silk:silk
+  hide-attributes: true
+  lore:
+    - "<gray>SILK — a tradeable commodity on Monad testnet.</gray>"
+    - "<dark_gray>0x4c88…b7a9f</dark_gray>"

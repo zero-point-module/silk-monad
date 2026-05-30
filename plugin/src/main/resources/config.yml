@@ -1,0 +1,9 @@
+chain:
+  rpc-url: "https://testnet-rpc.monad.xyz"
+  chain-id: 10143
+
+chat:
+  use-deterministic-colors: true
+  # MiniMessage template. Placeholders: <name>, <message>.
+  # The plugin substitutes <name-color> with the player's resolved color before parsing.
+  format: "<bold><name-color><name></name-color></bold> <gray>›</gray> <white><message></white>"

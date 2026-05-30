@@ -1,0 +1,10 @@
+id: spice
+type: item
+display-name: "<color:#ff8a4c>SPICE</color>"
+item:
+  material: PAPER
+  item-model: silk:spice
+  hide-attributes: true
+  lore:
+    - "<gray>SPICE — a tradeable commodity on Monad testnet.</gray>"
+    - "<dark_gray>0x7a2c…0b71d1</dark_gray>"

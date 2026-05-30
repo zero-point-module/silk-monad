@@ -264,15 +264,29 @@ export function createMindServer(host_public = false, port = 8080) {
         });
 
 		socket.on('send-message', (agentName, data) => {
-			if (!agent_connections[agentName]) {
-				console.warn(`Agent ${agentName} not in game, cannot send message via MindServer.`);
-                return;
+			// A message starting with the word "all" is broadcast to every connected
+			// agent instead of the single targeted one (the UI sends to one agent at a
+			// time). Each agent then strips the "all" prefix in its own respondFunc.
+			const isBroadcast = typeof data?.message === 'string' && /^\s*all\b/i.test(data.message);
+			const targets = isBroadcast ? Object.keys(agent_connections) : [agentName];
+
+			let delivered = 0;
+			for (const name of targets) {
+				const conn = agent_connections[name];
+				if (!conn || !conn.socket) {
+					if (!isBroadcast)
+						console.warn(`Agent ${name} not in game, cannot send message via MindServer.`);
+					continue;
+				}
+				try {
+					conn.socket.emit('send-message', data);
+					delivered++;
+				} catch (error) {
+					console.error('Error: ', error);
+				}
 			}
-			try {
-                agent_connections[agentName].socket.emit('send-message', data);
-			} catch (error) {
-				console.error('Error: ', error);
-			}
+			if (isBroadcast)
+				console.log(`Broadcast "${data.message}" to ${delivered} agent(s).`);
 		});
 
         socket.on('bot-output', (agentName, message) => {

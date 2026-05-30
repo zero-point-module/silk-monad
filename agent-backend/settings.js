@@ -8,7 +8,7 @@ const settings = {
     "mindserver_port": 8080,
     "auto_open_ui": true, // opens UI in browser on startup
     
-    "base_profile": "survival", // survival, assistant, creative, or god_mode
+    "base_profile": "assistant", // survival, assistant, creative, or god_mode
     "profiles": [
         // Persona-driven trading agents defined in ../agents.json (reuse funded wallets).
         "./profiles/marco.json",

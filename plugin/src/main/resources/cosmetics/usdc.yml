@@ -1,0 +1,11 @@
+id: usdc
+type: item
+display-name: "<#2775ca>USDC</#2775ca>"
+item:
+  material: PAPER
+  item-model: silk:usdc
+  custom-model-data: 2001
+  hide-attributes: true
+  lore:
+    - "<gray>USD Coin — a stable in-game currency.</gray>"
+    - "<dark_gray>1 USDC = 1 USD</dark_gray>"

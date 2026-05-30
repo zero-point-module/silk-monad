@@ -8,6 +8,7 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.jetbrains.annotations.Nullable;
+import org.bukkit.Location;
 import org.bukkit.entity.Display.Billboard;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.TextDisplay;
@@ -33,18 +34,32 @@ public final class BalanceHologram {
     }
 
     public BalanceHologram(LivingEntity carrier, float yOffset) {
-        this.display = (TextDisplay) carrier.getWorld().spawnEntity(
-                carrier.getLocation(), org.bukkit.entity.EntityType.TEXT_DISPLAY);
-        display.setBillboard(Billboard.CENTER);
-        display.setSeeThrough(true);
-        display.setShadowed(false);
-        display.setPersistent(false);
-        display.setTransformation(new Transformation(
+        this.display = makeDisplay(carrier.getLocation(), yOffset);
+        carrier.addPassenger(display);
+    }
+
+    /** Free-floating constructor — caller is responsible for repositioning via {@link #setLocation}. */
+    public BalanceHologram(Location at, float yOffset) {
+        this.display = makeDisplay(at.clone().add(0, yOffset, 0), 0f);
+    }
+
+    private static TextDisplay makeDisplay(Location at, float yOffset) {
+        TextDisplay td = (TextDisplay) at.getWorld().spawnEntity(at, org.bukkit.entity.EntityType.TEXT_DISPLAY);
+        td.setBillboard(Billboard.CENTER);
+        td.setSeeThrough(true);
+        td.setShadowed(false);
+        td.setPersistent(false);
+        td.setTransformation(new Transformation(
                 new Vector3f(0f, yOffset, 0f),
                 new AxisAngle4f(),
                 new Vector3f(1f, 1f, 1f),
                 new AxisAngle4f()));
-        carrier.addPassenger(display);
+        return td;
+    }
+
+    /** For free-floating mode: re-teleport to follow some external position. */
+    public void setLocation(Location loc) {
+        if (!display.isDead()) display.teleport(loc);
     }
 
     public void update(List<Token> tokens, Map<String, BigDecimal> balances, @Nullable Merchant merchant) {

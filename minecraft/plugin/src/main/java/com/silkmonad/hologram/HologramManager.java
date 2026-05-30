@@ -26,8 +26,7 @@ import java.util.UUID;
 public final class HologramManager {
 
     private static final long TICK_INTERVAL = 4L; // 5x/sec — matches display interp
-    private static final double RIGHT_DIST = 0.9;
-    private static final double CHEST_Y_OFFSET = 1.2; // from player feet
+    private static final double HEAD_Y_OFFSET = 2.4; // sits just above the player's head
 
     private final SilkMonadPlugin plugin;
     private final BalanceFetcher fetcher;
@@ -106,12 +105,9 @@ public final class HologramManager {
 
     private static Location slotLocation(Player p) {
         Location loc = p.getLocation();
-        double yawRad = Math.toRadians(loc.getYaw());
-        double rx = Math.cos(yawRad);
-        double rz = Math.sin(yawRad);
         return new Location(loc.getWorld(),
-                loc.getX() + rx * RIGHT_DIST,
-                loc.getY() + CHEST_Y_OFFSET,
-                loc.getZ() + rz * RIGHT_DIST);
+                loc.getX(),
+                loc.getY() + HEAD_Y_OFFSET,
+                loc.getZ());
     }
 }

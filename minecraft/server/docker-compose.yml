@@ -1,6 +1,6 @@
 services:
   minecraft:
-    image: itzg/minecraft-server:java21
+    image: itzg/minecraft-server:java25
     container_name: minecraft-paper
     ports:
       - '25565:25565'
@@ -16,7 +16,7 @@ services:
       SPAWN_PROTECTION: '0'
       CONNECTION_THROTTLE: '-1'
       RESOURCE_PACK: 'https://raw.githubusercontent.com/zero-point-module/silk-monad/main/minecraft/resource-pack/pack.zip'
-      RESOURCE_PACK_SHA1: '487a5434aaa11f2b3c36e1dbae95a532e2870af5'
+      RESOURCE_PACK_SHA1: 'b0e6d413e362efc39569b3f9873857d1f01d4b6c'
       RESOURCE_PACK_ENFORCE: 'TRUE'
       RESOURCE_PACK_PROMPT: 'silk-monad cosmetics pack'
       MODRINTH_PROJECTS: 'viaversion,viabackwards,viarewind,skinsrestorer,fastasyncworldedit,fancynpcs'

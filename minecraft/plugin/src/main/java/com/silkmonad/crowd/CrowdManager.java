@@ -387,15 +387,12 @@ public final class CrowdManager {
         }
     }
 
-    /** Position the balance panel at chest height on the NPC's right side. */
+    /** Position the balance panel just above the NPC's head. */
     private static Location slotLocation(Location loc) {
-        double yawRad = Math.toRadians(loc.getYaw());
-        double rx = Math.cos(yawRad);
-        double rz = Math.sin(yawRad);
         return new Location(loc.getWorld(),
-                loc.getX() + rx * 0.9,
-                loc.getY() + 1.2,
-                loc.getZ() + rz * 0.9);
+                loc.getX(),
+                loc.getY() + 2.4,
+                loc.getZ());
     }
 
     // ---------- helpers ----------

@@ -54,11 +54,14 @@ public final class CrowdManager {
     private static final double PICKUP_RANGE_SQ = 1.6 * 1.6;
     private static final double ARRIVAL_THRESHOLD_SQ = 0.4 * 0.4;
 
-    /** Skin pool — well-known Minecraft accounts that resolve cleanly via Mojang. */
+    /** Skin pool — Mojang accounts that resolve via the username lookup API.
+     *  Several names commonly listed online (Grumm, MHF_Steve, PaperMC, Mojang,
+     *  MojangSupport) either don't exist as paid accounts or aren't queryable
+     *  via the names endpoint, so they throw SkinLoadException. Keep this list
+     *  to actually-purchased Mojang dev/community accounts. */
     private static final String[] SKIN_POOL = {
-            "Notch", "jeb_", "Dinnerbone", "Grumm",
-            "Technoblade", "Hypixel", "PaperMC", "MojangSupport",
-            "Mojang", "MHF_Steve", "MHF_Alex"
+            "Notch", "jeb_", "Dinnerbone", "Technoblade",
+            "Hypixel", "thinkofdeath", "C418", "ez"
     };
 
     private final SilkMonadPlugin plugin;
@@ -106,9 +109,14 @@ public final class CrowdManager {
             NpcData data = new NpcData(id, creatorUuid, spawnLoc);
             data.setShowInTab(false);
             data.setCollidable(false);
-            data.setSkin(SKIN_POOL[rng.nextInt(SKIN_POOL.length)]);
             data.setType(EntityType.PLAYER);
             data.setTurnToPlayer(false);
+            // Skin lookup hits Mojang; failures shouldn't crash the spawn loop.
+            try {
+                data.setSkin(SKIN_POOL[rng.nextInt(SKIN_POOL.length)]);
+            } catch (Exception e) {
+                plugin.getLogger().fine("Skin lookup failed (using default): " + e.getMessage());
+            }
 
             Npc npc = FancyNpcsPlugin.get().getNpcAdapter().apply(data);
             npc.setSaveToFile(false);

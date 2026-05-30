@@ -1,0 +1,21 @@
+language: default # Language to use for translatable messages.
+skip_invisible_npcs: true # Whether invisible NPCs should not be sent to the player.
+disable_interaction_cooldown_message: false # Whether interaction cooldown messages are disabled.
+mute_version_notification: false # Whether version notifications are muted.
+enable_autosave: true # Whether autosave is enabled.
+autosave_interval: 15 # The interval at which autosave is performed in minutes.
+npc_update_interval: 60 # The interval at which the NPC is updated (in seconds). Only if the skin or displayName is a placeholder.
+npc_update_visibility_interval: 20 # The interval at which the NPC visibility is updated (in ticks).
+register_commands: true # Whether the plugin should register its commands.
+turn_to_player_distance: 5 # The distance at which NPCs turn to the player.
+turn_to_player_reset_to_initial_direction: false # Whether direction of NPC should be reset when leaving their turning range.
+visibility_distance: 20 # The distance at which NPCs are visible.
+mineskin_api_key: '' # The API key for the MineSkin API. This will be used to load skins faster. You can get an API key at https://mineskin.org/account.
+remove_npcs_from_playerlist_delay: 2000 # The delay in milliseconds to remove NPCs from the player list. Increase this value if you have problems with skins not loading correctly when joining or switching worlds. You can set it to -1, if you don't have any npcs using the show_in_tab feature.
+swing_arm_on_update: true # Whether NPCs should swing arm on update.
+blocked_commands: # The commands that are blocked for NPCs in the message.
+  - op
+  - ban
+max-npcs: # The maximum number of NPCs per permission. (for the 'player-npcs' feature flag only)
+  - fancynpcs.max-npcs.5: 5
+  - fancynpcs.max-npcs.10: 10

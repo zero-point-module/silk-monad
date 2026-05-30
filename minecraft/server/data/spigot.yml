@@ -163,6 +163,8 @@ world-settings:
       tile: 50
       entity: 50
     verbose: false
+  worldeditregentempworld:
+    verbose: false
 config-version: 12
 commands:
   log: true

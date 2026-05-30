@@ -1,0 +1,6 @@
+feature-flags:
+  player-npcs: false # Every player can only manage the npcs they have created
+  use-native-threads: false # Use native threads instead of virtual threads.
+  enable-debug-mode: false # Enable debug mode
+  enable-folia-visibility-fix: false # When enabled, all npcs will respawn after 100ms when they should spawn
+  use-minecraft-usercache: false # Include the content of usercache.json to the username->uuid cache

@@ -372,6 +372,11 @@ public final class CrowdManager {
 
     // ---------- movement ----------
 
+    /** Max vertical change per step before we refuse to take it (walkable stair height). */
+    private static final double MAX_STEP_UP = 1.0;
+    /** Max one-tick fall before we treat the move as crossing a cliff. */
+    private static final double MAX_STEP_DOWN = 1.5;
+
     private void stepToward(CrowdMember m, Location target) {
         Vector delta = target.toVector().subtract(m.currentLocation.toVector());
         double distSq = delta.lengthSquared();
@@ -383,11 +388,23 @@ public final class CrowdManager {
 
         double nextX = m.currentLocation.getX() + unit.getX();
         double nextZ = m.currentLocation.getZ() + unit.getZ();
-        double nextY = world.getHighestBlockYAt((int) Math.floor(nextX), (int) Math.floor(nextZ)) + 1.0;
+        double currentY = m.currentLocation.getY();
+        double groundY = world.getHighestBlockYAt((int) Math.floor(nextX), (int) Math.floor(nextZ)) + 1.0;
+        double yDelta = groundY - currentY;
 
-        // Face direction of travel.
+        if (yDelta > MAX_STEP_UP || yDelta < -MAX_STEP_DOWN) {
+            // Too steep — refuse this step. Pick a new wander target next tick.
+            m.moveTarget = null;
+            // Nudge yaw so they look elsewhere; otherwise they just stare at the wall.
+            float turn = m.currentLocation.getYaw() + 90f * (ThreadLocalRandom.current().nextBoolean() ? 1 : -1);
+            m.currentLocation.setYaw(turn);
+            m.npc.getData().setLocation(m.currentLocation);
+            m.npc.updateForAll();
+            return;
+        }
+
         float yaw = (float) Math.toDegrees(Math.atan2(-unit.getX(), unit.getZ()));
-        Location next = new Location(world, nextX, nextY, nextZ, yaw, 0f);
+        Location next = new Location(world, nextX, groundY, nextZ, yaw, 0f);
         m.currentLocation = next;
         m.npc.getData().setLocation(next);
         m.npc.moveForAll(false); // swingArm=false — they were constantly punching the air

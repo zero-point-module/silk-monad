@@ -14,7 +14,11 @@ services:
       VIEW_DISTANCE: "6"
       SIMULATION_DISTANCE: "6"
       SPAWN_PROTECTION: "0"
-      MODRINTH_PROJECTS: "viaversion,skinsrestorer"
+      RESOURCE_PACK: "https://raw.githubusercontent.com/zero-point-module/silk-monad/main/resource-pack/pack.zip"
+      RESOURCE_PACK_SHA1: "6532f8904d80bdb0060e4e2ac2ebdb062b2e128f"
+      RESOURCE_PACK_ENFORCE: "TRUE"
+      RESOURCE_PACK_PROMPT: "silk-monad cosmetics pack"
+      MODRINTH_PROJECTS: "viaversion,viabackwards,viarewind,skinsrestorer"
       MODRINTH_DOWNLOAD_DEPENDENCIES: "required"
       ENABLE_RCON: "TRUE"
       RCON_CMDS_STARTUP: |-

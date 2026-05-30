@@ -1,0 +1,20 @@
+name: SilkMonad
+version: '${version}'
+main: com.silkmonad.SilkMonadPlugin
+api-version: '1.21'
+description: Custom cosmetics framework for the silk-monad server
+authors: [silk-monad]
+commands:
+  silk:
+    description: SilkMonad cosmetics root command
+    usage: |
+      /silk give <cosmetic-id> [player]
+      /silk apply <cosmetic-id> [player]
+      /silk remove <cosmetic-id> [player]
+      /silk list [type]
+      /silk reload
+    permission: silkmonad.use
+permissions:
+  silkmonad.use:
+    description: Use SilkMonad commands
+    default: op

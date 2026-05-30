@@ -2,7 +2,7 @@
  * Fund the deployer + every agent with testnet MON via the agent faucet API.
  * On failure, prints the official faucet URL to fund by hand. Safe to re-run.
  */
-import { loadAgents, deployerAccount, publicClient, txUrl } from '../lib/config.js';
+import { loadAgents, deployerAccount, publicClient, txUrl } from './lib/config.js';
 
 const FAUCET_URL = 'https://agents.devnads.com/v1/faucet';
 const CHAIN_ID = 10143;

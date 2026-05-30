@@ -4,8 +4,8 @@ import { getCommandDocs } from './index.js';
 import convoManager from '../conversation.js';
 import { checkLevelBlueprint, checkBlueprint } from '../tasks/construction_tasks.js';
 import { load } from 'cheerio';
-import * as erc20 from '../blockchain/erc20.js';
-import { getAddress } from '../blockchain/wallets.js';
+import * as erc20 from '../../../../blockchain/erc20.js';
+import { getAddress } from '../../../../blockchain/wallets.js';
 
 const pad = (str) => {
     return '\n' + str + '\n';

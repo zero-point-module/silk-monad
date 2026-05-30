@@ -9,7 +9,7 @@ import { createWalletClient, http } from 'viem';
 import {
   ROOT, monadTestnet, RPC_URL, publicClient, txUrl,
   loadTokens, saveTokens, deployerAccount,
-} from '../lib/config.js';
+} from './lib/config.js';
 
 const CONTRACTS_DIR = path.join(ROOT, 'blockchain', 'contracts');
 const ARTIFACT = path.join(CONTRACTS_DIR, 'out', 'Good.sol', 'Good.json');

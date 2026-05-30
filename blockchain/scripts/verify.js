@@ -6,7 +6,7 @@ import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
 import { encodeAbiParameters, parseAbiParameters } from 'viem';
-import { ROOT, loadTokens } from '../lib/config.js';
+import { ROOT, loadTokens } from './lib/config.js';
 
 const CONTRACTS_DIR = path.join(ROOT, 'blockchain', 'contracts');
 const ARTIFACT = path.join(CONTRACTS_DIR, 'out', 'Good.sol', 'Good.json');

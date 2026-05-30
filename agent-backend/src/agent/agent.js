@@ -17,7 +17,7 @@ import settings from './settings.js';
 import { Task } from './tasks/tasks.js';
 import { speak } from './speak.js';
 import { log, validateNameFormat, handleDisconnection } from './connection_handler.js';
-import { ensureWallet } from './blockchain/wallets.js';
+import { ensureWallet } from '../../../blockchain/wallets.js';
 
 export class Agent {
     async start(load_mem=false, init_message=null, count_id=0) {

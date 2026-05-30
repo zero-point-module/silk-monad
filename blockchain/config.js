@@ -1,7 +1,6 @@
 import { readFileSync } from 'fs';
 import { createPublicClient, http } from 'viem';
 import { monadTestnet } from 'viem/chains';
-import { hasKey, getKey } from '../../utils/keys.js';
 
 // We always target Monad testnet (chainId 10143). viem ships the chain config,
 // so we don't define our own. RPC can be overridden via MONAD_RPC_URL in keys.json
@@ -9,8 +8,18 @@ import { hasKey, getKey } from '../../utils/keys.js';
 export const MONAD_CHAIN = monadTestnet;
 const DEFAULT_RPC = 'https://testnet-rpc.monad.xyz';
 
+// Read keys.json directly (cwd-relative, like the wallet keys) so this module
+// has no dependency on the agent framework.
+function readKeysFile() {
+    try {
+        return JSON.parse(readFileSync('./keys.json', 'utf8'));
+    } catch {
+        return {};
+    }
+}
+
 export function getRpcUrl() {
-    return hasKey('MONAD_RPC_URL') ? getKey('MONAD_RPC_URL') : DEFAULT_RPC;
+    return readKeysFile().MONAD_RPC_URL || process.env.MONAD_RPC_URL || DEFAULT_RPC;
 }
 
 // Shared read-only client. Building it is lazy (no connection until a call is made),

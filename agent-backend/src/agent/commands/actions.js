@@ -1,8 +1,8 @@
 import * as skills from '../library/skills.js';
 import settings from '../settings.js';
 import convoManager from '../conversation.js';
-import * as erc20 from '../blockchain/erc20.js';
-import { getAddress } from '../blockchain/wallets.js';
+import * as erc20 from '../../../../blockchain/erc20.js';
+import { getAddress } from '../../../../blockchain/wallets.js';
 
 
 function runAsAction (actionFn, resume = false, timeout = -1) {

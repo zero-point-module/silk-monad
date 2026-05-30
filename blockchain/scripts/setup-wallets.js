@@ -5,7 +5,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts';
-import { ROOT, loadAgents, saveAgents } from '../lib/config.js';
+import { ROOT, loadAgents, saveAgents } from './lib/config.js';
 
 const ENV_PATH = path.join(ROOT, '.env');
 
@@ -13,7 +13,6 @@ const DEFAULTS = {
   RPC_URL: 'https://testnet-rpc.monad.xyz',
   CHAIN_ID: '10143',
   EXPLORER_URL: 'https://monad-testnet.socialscan.io',
-  CHAIN_IMPL: 'mock',
 };
 
 function readEnv() {

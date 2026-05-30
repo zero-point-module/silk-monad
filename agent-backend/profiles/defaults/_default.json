@@ -55,6 +55,34 @@
         ],
 
         [
+            {"role": "system", "content": "trade an adequate amount of your tokens for 8 oak_log with gpt"},
+            {"role": "assistant", "content": "Let me see which tokens I have to offer. !myTokens"},
+            {"role": "system", "content": "Your token balances (wallet 0xd509E3cb6c9eA1E00e9Ca53a6777Ee31477d67F9):\n- SILK: 100\n- SPICE: 40\n- JADE: 0"},
+            {"role": "assistant", "content": "I have SILK and SPICE to spend. !startConversation(\"gpt\", \"Hey gpt, I'd like to buy 8 oak_log. I can pay in SILK or SPICE — which do you want, and how much?\")"},
+            {"role": "user", "content": "gpt: (FROM OTHER BOT)I'll take 20 SPICE for 8 oak_log."},
+            {"role": "assistant", "content": "That's a little steep. I'll give you 12 SPICE for the 8 oak_log."},
+            {"role": "user", "content": "gpt: (FROM OTHER BOT)Let's meet in the middle at 15 SPICE."},
+            {"role": "assistant", "content": "Deal, 15 SPICE for 8 oak_log. Let me grab your wallet address. !walletAddress(\"gpt\")"},
+            {"role": "system", "content": "gpt's wallet address is 0xC0ffee254729296a45a3885639AC7E10F9d54979."},
+            {"role": "assistant", "content": "Sending payment now. !payToken(\"gpt\", \"SPICE\", 15)"},
+            {"role": "system", "content": "Sent 15 SPICE to gpt (0xC0ffee254729296a45a3885639AC7E10F9d54979). Transaction hash: 0xabc123. Tell them this hash so they can verify the payment."},
+            {"role": "assistant", "content": "Paid! Here's the transaction hash so you can verify: 0xabc123. Please send the 8 oak_log when you've confirmed it."},
+            {"role": "user", "content": "gpt: (FROM OTHER BOT)Verified, thanks! Here you go."},
+            {"role": "assistant", "content": "Thanks for the trade! !endConversation(\"gpt\")"}
+        ],
+
+        [
+            {"role": "user", "content": "andy: (FROM OTHER BOT)Hey, I'd like to buy 8 oak_log. I can pay in SILK or SPICE — which do you want, and how much?"},
+            {"role": "assistant", "content": "I'll take 20 SPICE for 8 oak_log."},
+            {"role": "user", "content": "andy: (FROM OTHER BOT)That's steep, I'll give you 12 SPICE."},
+            {"role": "assistant", "content": "Let's meet in the middle at 15 SPICE."},
+            {"role": "user", "content": "andy: (FROM OTHER BOT)Deal. Paid! Transaction hash: 0xabc123. Please send the 8 oak_log."},
+            {"role": "assistant", "content": "Let me verify your payment on-chain before sending anything. !verifyPayment(\"andy\", \"SPICE\", 15, \"0xabc123\")"},
+            {"role": "system", "content": "Payment verified: received 15 SPICE from andy. It is now safe to hand over the item."},
+            {"role": "assistant", "content": "Payment confirmed, sending your wood over now! !givePlayer(\"andy\", \"oak_log\", 8)"}
+        ],
+
+        [
             {"role": "user", "content": "rupert: (FROM OTHER BOT)Let's collaborate to build a house!"},
             {"role": "assistant", "content": "Sure! I'll share information to help coordinate. Let's center the build at x:942, y:54, z:1355 !newAction(\"Build a 10x10 base of a house at location\")"},
             {"role": "user", "content": "rupert: (FROM OTHER BOT)Alright, I'll build the walls! !newAction('Build a 10x10 wall of a house at the same location')"}

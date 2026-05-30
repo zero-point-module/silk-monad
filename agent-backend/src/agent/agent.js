@@ -17,6 +17,7 @@ import settings from './settings.js';
 import { Task } from './tasks/tasks.js';
 import { speak } from './speak.js';
 import { log, validateNameFormat, handleDisconnection } from './connection_handler.js';
+import { ensureWallet } from './blockchain/wallets.js';
 
 export class Agent {
     async start(load_mem=false, init_message=null, count_id=0) {
@@ -39,6 +40,15 @@ export class Agent {
             return;
         }
         
+        // Ensure this agent has an on-chain wallet (generated + persisted on first run).
+        if (settings.blockchain_enabled) {
+            try {
+                await ensureWallet(this.name);
+            } catch (err) {
+                console.error(`[blockchain] Failed to initialize wallet for ${this.name}:`, err);
+            }
+        }
+
         this.history = new History(this);
         this.coder = new Coder(this);
         this.npc = new NPCContoller(this);
@@ -60,6 +70,11 @@ export class Agent {
         }
         this.task = new Task(this, settings.task, taskStart);
         this.blocked_actions = settings.blocked_actions.concat(this.task.blocked_actions || []);
+        // Command lists are built at import time, before settings are loaded, so on-chain
+        // trade commands are always defined; hide them at runtime when blockchain is off.
+        if (!settings.blockchain_enabled) {
+            this.blocked_actions = this.blocked_actions.concat(['!payToken', '!verifyPayment', '!tokenBalance', '!myTokens', '!walletAddress']);
+        }
         blacklistCommands(this.blocked_actions);
 
         console.log(this.name, 'logging into minecraft...');
@@ -144,6 +159,35 @@ export class Agent {
         });
     }
 
+    /**
+     * In a multi-agent public chat, returns the slice of `message` addressed to
+     * this agent: the text from this agent's name up to the next agent's name.
+     * Returns null if this agent's name does not appear in the message.
+     */
+    getDirectedMessage(message) {
+        const lower = message.toLowerCase();
+        const findName = (name, fromIdx = 0) => {
+            const escaped = name.toLowerCase().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            const re = new RegExp(`\\b${escaped}\\b`, 'g');
+            re.lastIndex = fromIdx;
+            const match = re.exec(lower);
+            return match ? match.index : -1;
+        };
+
+        const myIdx = findName(this.name);
+        if (myIdx === -1) return null; // this agent isn't addressed
+
+        // Cut off at the next agent's name so we only act on our part of the message.
+        let endIdx = message.length;
+        for (const name of convoManager.getInGameAgents()) {
+            if (name === this.name) continue;
+            const idx = findName(name, myIdx + this.name.length);
+            if (idx !== -1 && idx < endIdx)
+                endIdx = idx;
+        }
+        return message.substring(myIdx, endIdx).trim();
+    }
+
     async _setupEventHandlers(save_data, init_message) {
         const ignore_messages = [
             "Set own game mode to",
@@ -161,17 +205,25 @@ export class Agent {
             try {
                 if (ignore_messages.some((m) => message.startsWith(m))) return;
 
+                if (convoManager.isOtherAgent(username)) {
+                    console.warn('received whisper from other bot??')
+                    return;
+                }
+
+                // When multiple agents share the public chat, only respond to messages
+                // that address this agent by name, and only act on the part meant for it.
+                if (convoManager.getInGameAgents().length > 1) {
+                    const directed = this.getDirectedMessage(message);
+                    if (directed === null) return; // not addressed to this agent
+                    message = directed;
+                }
+
                 this.shut_up = false;
 
                 console.log(this.name, 'received message from', username, ':', message);
 
-                if (convoManager.isOtherAgent(username)) {
-                    console.warn('received whisper from other bot??')
-                }
-                else {
-                    let translation = await handleEnglishTranslation(message);
-                    this.handleMessage(username, translation);
-                }
+                let translation = await handleEnglishTranslation(message);
+                this.handleMessage(username, translation);
             } catch (error) {
                 console.error('Error handling message:', error);
             }
@@ -182,7 +234,7 @@ export class Agent {
         this.bot.on('whisper', respondFunc);
         
         this.bot.on('chat', (username, message) => {
-            if (serverProxy.getNumOtherAgents() > 0) return;
+            // if (serverProxy.getNumOtherAgents() > 0) return;
             // only respond to open chat messages when there are no other agents
             respondFunc(username, message);
         });

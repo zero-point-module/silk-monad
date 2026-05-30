@@ -5,7 +5,6 @@ services:
     ports:
       - '25565:25565'
     environment:
-<<<<<<< HEAD
       EULA: 'TRUE'
       TYPE: 'PAPER'
       VERSION: '1.21.6'
@@ -16,30 +15,12 @@ services:
       SIMULATION_DISTANCE: '6'
       SPAWN_PROTECTION: '0'
       RESOURCE_PACK: 'https://raw.githubusercontent.com/zero-point-module/silk-monad/main/resource-pack/pack.zip'
-      RESOURCE_PACK_SHA1: '2f99ef8dc5062102ca8b764863d9993e009392f9'
+      RESOURCE_PACK_SHA1: 'bf21dcd7559c979b537312759ad07dc38e4b7c13'
       RESOURCE_PACK_ENFORCE: 'TRUE'
       RESOURCE_PACK_PROMPT: 'silk-monad cosmetics pack'
       MODRINTH_PROJECTS: 'viaversion,viabackwards,viarewind,skinsrestorer'
       MODRINTH_DOWNLOAD_DEPENDENCIES: 'required'
       ENABLE_RCON: 'TRUE'
-=======
-      EULA: "TRUE"
-      TYPE: "PAPER"
-      VERSION: "1.21.6"
-      MEMORY: "2G"
-      TZ: "UTC"
-      ONLINE_MODE: "FALSE"
-      VIEW_DISTANCE: "6"
-      SIMULATION_DISTANCE: "6"
-      SPAWN_PROTECTION: "0"
-      RESOURCE_PACK: "https://raw.githubusercontent.com/zero-point-module/silk-monad/main/resource-pack/pack.zip"
-      RESOURCE_PACK_SHA1: "bf21dcd7559c979b537312759ad07dc38e4b7c13"
-      RESOURCE_PACK_ENFORCE: "TRUE"
-      RESOURCE_PACK_PROMPT: "silk-monad cosmetics pack"
-      MODRINTH_PROJECTS: "viaversion,viabackwards,viarewind,skinsrestorer"
-      MODRINTH_DOWNLOAD_DEPENDENCIES: "required"
-      ENABLE_RCON: "TRUE"
->>>>>>> 47abf5de1e887ae4975f8eed87351047dfc9a74c
       RCON_CMDS_STARTUP: |-
         gamerule doDaylightCycle false
         gamerule doWeatherCycle false

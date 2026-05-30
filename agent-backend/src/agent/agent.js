@@ -161,10 +161,17 @@ export class Agent {
 
     /**
      * In a multi-agent public chat, returns the slice of `message` addressed to
-     * this agent: the text from this agent's name up to the next agent's name.
-     * A message starting with the word "all" is addressed to every agent, so we
-     * strip the keyword and return the rest. Returns null if this agent's name
-     * does not appear in the message.
+     * this agent, or null if it isn't addressed.
+     *
+     * Rules:
+     * - "all ..." addresses every agent (the keyword is stripped).
+     * - The first agent named is the primary addressee and gets the WHOLE
+     *   instruction, including any counterparty in it. So "marco trade with aisha"
+     *   gives marco the full text (he knows to trade with aisha), and aisha stays
+     *   silent — she is a referenced counterparty, not a second addressee.
+     * - A later-named agent is its own addressee only if its name begins a new
+     *   clause (preceded by ',' ';' '.' or newline). So "marco do x, aisha do y"
+     *   splits into one instruction each.
      */
     getDirectedMessage(message) {
         // "all ..." (also "all, ..." / "all: ...") addresses every agent.
@@ -172,26 +179,47 @@ export class Agent {
         if (allMatch) return message.slice(allMatch[0].length).trim();
 
         const lower = message.toLowerCase();
-        const findName = (name, fromIdx = 0) => {
+        const myName = this.name.toLowerCase();
+
+        // Names to scan for: this agent plus the other in-game agents. Always include
+        // self — getInGameAgents() may not list this agent from its own perspective,
+        // and without self it could never detect being addressed.
+        const seen = new Set();
+        const agentNames = [];
+        for (const n of [this.name, ...convoManager.getInGameAgents()]) {
+            const ln = n.toLowerCase();
+            if (!seen.has(ln)) { seen.add(ln); agentNames.push(n); }
+        }
+
+        // Every agent-name mention, in order of appearance.
+        const occurrences = [];
+        for (const name of agentNames) {
             const escaped = name.toLowerCase().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
             const re = new RegExp(`\\b${escaped}\\b`, 'g');
-            re.lastIndex = fromIdx;
-            const match = re.exec(lower);
-            return match ? match.index : -1;
-        };
-
-        const myIdx = findName(this.name);
-        if (myIdx === -1) return null; // this agent isn't addressed
-
-        // Cut off at the next agent's name so we only act on our part of the message.
-        let endIdx = message.length;
-        for (const name of convoManager.getInGameAgents()) {
-            if (name === this.name) continue;
-            const idx = findName(name, myIdx + this.name.length);
-            if (idx !== -1 && idx < endIdx)
-                endIdx = idx;
+            let m;
+            while ((m = re.exec(lower)) !== null)
+                occurrences.push({ name: name.toLowerCase(), index: m.index });
         }
-        return message.substring(myIdx, endIdx).trim();
+        if (occurrences.length === 0) return null;
+        occurrences.sort((a, b) => a.index - b.index);
+
+        // A name is an addressee if it's the first mentioned, or it starts a new
+        // clause; otherwise it's just a referenced counterparty ("...with aisha").
+        const isClauseStart = (idx) => {
+            const before = message.slice(0, idx).replace(/\s+$/, '');
+            return before === '' || /[,;.\n]$/.test(before);
+        };
+        const addressees = occurrences.filter((o, i) => i === 0 || isClauseStart(o.index));
+
+        const mine = addressees.find((o) => o.name === myName);
+        if (!mine) return null; // not addressed (or only a counterparty)
+
+        // Primary addressee gets the message from the start (keeps a leading verb
+        // like "trade with ..."); a later addressee starts at its own name.
+        const start = (mine === addressees[0]) ? 0 : mine.index;
+        const next = addressees.find((o) => o.index > mine.index);
+        const end = next ? next.index : message.length;
+        return message.substring(start, end).trim();
     }
 
     async _setupEventHandlers(save_data, init_message) {

@@ -13,10 +13,12 @@ java {
 repositories {
     mavenCentral()
     maven("https://repo.papermc.io/repository/maven-public/")
+    maven("https://repo.fancyinnovations.com/releases")
 }
 
 dependencies {
     compileOnly("io.papermc.paper:paper-api:1.21.6-R0.1-SNAPSHOT")
+    compileOnly("de.oliver:FancyNpcs:2.9.2")
     implementation("org.web3j:crypto:4.12.0")
     implementation("org.web3j:abi:4.12.0")
     implementation("org.web3j:utils:4.12.0")

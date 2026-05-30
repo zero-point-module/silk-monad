@@ -10,7 +10,6 @@ import net.kyori.adventure.text.format.TextDecoration;
 import org.jetbrains.annotations.Nullable;
 import org.bukkit.Location;
 import org.bukkit.entity.Display.Billboard;
-import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.TextDisplay;
 import org.bukkit.util.Transformation;
 import org.joml.AxisAngle4f;
@@ -29,16 +28,7 @@ public final class BalanceHologram {
 
     private final TextDisplay display;
 
-    public BalanceHologram(LivingEntity carrier) {
-        this(carrier, 0.6f);
-    }
-
-    public BalanceHologram(LivingEntity carrier, float yOffset) {
-        this.display = makeDisplay(carrier.getLocation(), yOffset);
-        carrier.addPassenger(display);
-    }
-
-    /** Free-floating constructor — caller is responsible for repositioning via {@link #setLocation}. */
+    /** Free-floating — caller repositions via {@link #setLocation}. */
     public BalanceHologram(Location at, float yOffset) {
         this.display = makeDisplay(at.clone().add(0, yOffset, 0), 0f);
     }
@@ -49,6 +39,8 @@ public final class BalanceHologram {
         td.setSeeThrough(true);
         td.setShadowed(false);
         td.setPersistent(false);
+        td.setDefaultBackground(true);
+        td.setTeleportDuration(4);
         td.setTransformation(new Transformation(
                 new Vector3f(0f, yOffset, 0f),
                 new AxisAngle4f(),

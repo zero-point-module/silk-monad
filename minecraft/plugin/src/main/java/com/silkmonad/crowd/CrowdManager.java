@@ -116,7 +116,7 @@ public final class CrowdManager {
             npc.create();
             npc.spawnForAll();
 
-            BalanceHologram hologram = new BalanceHologram(spawnLoc, 2.1f);
+            BalanceHologram hologram = new BalanceHologram(slotLocation(spawnLoc), 0f);
             CrowdMember m = new CrowdMember(id, npc, hologram, spawnLoc.clone());
             seedMockBalances(m, rng);
             updateHologram(m);
@@ -383,8 +383,19 @@ public final class CrowdManager {
 
     private void stepHologram(CrowdMember m) {
         if (m.hologram != null) {
-            m.hologram.setLocation(m.currentLocation.clone().add(0, 2.1, 0));
+            m.hologram.setLocation(slotLocation(m.currentLocation));
         }
+    }
+
+    /** Position the balance panel at chest height on the NPC's right side. */
+    private static Location slotLocation(Location loc) {
+        double yawRad = Math.toRadians(loc.getYaw());
+        double rx = Math.cos(yawRad);
+        double rz = Math.sin(yawRad);
+        return new Location(loc.getWorld(),
+                loc.getX() + rx * 0.9,
+                loc.getY() + 1.2,
+                loc.getZ() + rz * 0.9);
     }
 
     // ---------- helpers ----------

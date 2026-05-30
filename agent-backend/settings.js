@@ -8,11 +8,19 @@ const settings = {
     "mindserver_port": 8080,
     "auto_open_ui": true, // opens UI in browser on startup
     
-    "base_profile": "assistant", // survival, assistant, creative, or god_mode
+    "base_profile": "survival", // survival, assistant, creative, or god_mode
     "profiles": [
+        // Persona-driven trading agents defined in ../agents.json (reuse funded wallets).
+        "./profiles/marco.json",
+        "./profiles/aisha.json",
+        "./profiles/chen.json",
+        // Extra agents with their own auto-generated (initially empty) wallets.
+        "./profiles/gpt2.json",
+        "./profiles/claude2.json",
+        // gpt/claude/andy share wallets with the personas above, so leave them off.
         // "./andy.json",
-        "./profiles/gpt.json",
-        "./profiles/claude.json",
+        // "./profiles/gpt.json",
+        // "./profiles/claude.json",
         // "./profiles/gemini.json",
         // "./profiles/llama.json",
         // "./profiles/qwen.json",

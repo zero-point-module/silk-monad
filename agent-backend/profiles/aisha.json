@@ -1,0 +1,7 @@
+{
+    "name": "aisha",
+
+    "model": "claude-sonnet-4-6",
+
+    "embedding": "openai"
+}

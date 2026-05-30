@@ -77,6 +77,10 @@ public final class SilkMonadPlugin extends JavaPlugin {
         return treasury;
     }
 
+    public BubbleManager bubbleManager() {
+        return bubbleManager;
+    }
+
     public NamespacedKey key(String name) {
         return new NamespacedKey(this, name);
     }

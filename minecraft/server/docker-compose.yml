@@ -17,7 +17,7 @@ services:
       SPAWN_PROTECTION: '0'
       CONNECTION_THROTTLE: '-1'
       RESOURCE_PACK: 'https://raw.githubusercontent.com/zero-point-module/silk-monad/main/minecraft/resource-pack/pack.zip'
-      RESOURCE_PACK_SHA1: '01f2d1412072ed0dda4f51d2b09573cddcfa63bd'
+      RESOURCE_PACK_SHA1: '8ecfad9034968c61189200c43f66b2e67c768a34'
       RESOURCE_PACK_ENFORCE: 'TRUE'
       RESOURCE_PACK_PROMPT: 'silk-monad cosmetics pack'
       MODRINTH_PROJECTS: 'viaversion,viabackwards,viarewind,skinsrestorer,fastasyncworldedit,fancynpcs'

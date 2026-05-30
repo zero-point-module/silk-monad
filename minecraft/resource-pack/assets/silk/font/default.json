@@ -20,19 +20,6 @@
       "ascent": 7,
       "height": 10,
       "chars": [""]
-    },
-    {
-      "type": "minecraft:bitmap",
-      "file": "silk:gui/panel.png",
-      "ascent": 8,
-      "height": 48,
-      "chars": [""]
-    },
-    {
-      "type": "minecraft:space",
-      "advances": {
-        "": -107
-      }
     }
   ]
 }

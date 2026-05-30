@@ -1,7 +1,6 @@
 package com.silkmonad.chat;
 
 import com.silkmonad.SilkMonadPlugin;
-import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.Bukkit;
@@ -46,19 +45,32 @@ public final class BubbleManager {
     /** Approximate Minecraft default-font glyph width in pixels. */
     private static final double AVG_CHAR_PX = 6.0;
 
-    /** Custom font defined in the resource pack — assets/silk/font/default.json. */
-    private static final Key SILK_FONT = Key.key("silk", "default");
-    private static final Key DEFAULT_FONT = Key.key("minecraft", "default");
-    /** U+E100 = panel.png glyph; U+E101 = negative-advance spacer that rewinds the cursor. */
-    private static final Component PANEL_PREFIX =
-            Component.text("").font(SILK_FONT);
-
+    // GUI-panel attempt removed — was breaking the font file when the spacer
+    // provider used the legacy 'space' type. Revert to Minecraft's default
+    // text backdrop, which renders cleanly and doesn't require custom glyphs.
     private final SilkMonadPlugin plugin;
     private final Map<UUID, Deque<Bubble>> bubbles = new HashMap<>();
     private BukkitTask task;
+    private boolean enabled = true;
 
     public BubbleManager(SilkMonadPlugin plugin) {
         this.plugin = plugin;
+    }
+
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    /** Toggle bubbles on/off. When disabling, despawns any currently-visible bubbles. */
+    public boolean toggle() {
+        enabled = !enabled;
+        if (!enabled) {
+            for (Deque<Bubble> dq : bubbles.values()) {
+                for (Bubble b : dq) b.remove();
+            }
+            bubbles.clear();
+        }
+        return enabled;
     }
 
     public void start() {
@@ -79,6 +91,7 @@ public final class BubbleManager {
 
     /** Call on the main thread when a player sends a chat message. */
     public void onChat(Player speaker, Component message) {
+        if (!enabled) return;
         Deque<Bubble> dq = bubbles.computeIfAbsent(speaker.getUniqueId(), k -> new ArrayDeque<>());
         // Trim oldest to make room.
         while (dq.size() >= MAX_BUBBLES) {
@@ -93,17 +106,14 @@ public final class BubbleManager {
         td.setShadowed(false);
         td.setPersistent(false);
         td.setLineWidth(LINE_WIDTH_PX);
-        // Panel glyph (via PANEL_PREFIX) replaces the default backdrop.
-        td.setDefaultBackground(false);
+        td.setDefaultBackground(true);
         td.setTeleportDuration((int) TICK_INTERVAL);
         td.setTransformation(new Transformation(
                 new Vector3f(0f, 0f, 0f),
                 new AxisAngle4f(),
                 new Vector3f(1f, 1f, 1f),
                 new AxisAngle4f()));
-        // Force the message body to render in Minecraft's default font so it
-        // doesn't accidentally inherit the silk font from the panel prefix.
-        td.text(PANEL_PREFIX.append(message.font(DEFAULT_FONT)));
+        td.text(message);
         dq.push(new Bubble(td, System.currentTimeMillis(), lineCount));
     }
 

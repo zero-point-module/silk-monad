@@ -59,9 +59,20 @@ public final class SilkCommand implements CommandExecutor, TabCompleter {
             case "remove" -> handleRemove(sender, args);
             case "wallet" -> plugin.walletCommand().handle(sender, rest);
             case "crowd" -> plugin.crowdCommand().handle(sender, rest);
+            case "bubbles" -> handleBubbles(sender);
             default -> sender.sendMessage(Component.text("Unknown subcommand: " + sub, NamedTextColor.RED));
         }
         return true;
+    }
+
+    private void handleBubbles(CommandSender sender) {
+        if (!sender.hasPermission("silkmonad.bubbles")) {
+            sender.sendMessage(Component.text("Missing permission silkmonad.bubbles", NamedTextColor.RED));
+            return;
+        }
+        boolean enabled = plugin.bubbleManager().toggle();
+        sender.sendMessage(Component.text("Chat bubbles " + (enabled ? "enabled" : "disabled") + ".",
+                enabled ? NamedTextColor.GREEN : NamedTextColor.GRAY));
     }
 
     private void handleApply(CommandSender sender, String[] args) {
@@ -185,7 +196,7 @@ public final class SilkCommand implements CommandExecutor, TabCompleter {
     @Override
     public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
         if (args.length == 1) {
-            return filter(Arrays.asList("give", "apply", "remove", "list", "reload", "wallet", "crowd"), args[0]);
+            return filter(Arrays.asList("give", "apply", "remove", "list", "reload", "wallet", "crowd", "bubbles"), args[0]);
         }
         if (args.length == 2 && (args[0].equalsIgnoreCase("give") || args[0].equalsIgnoreCase("apply") || args[0].equalsIgnoreCase("remove"))) {
             return filter(plugin.registry().all().stream().map(Cosmetic::id).toList(), args[1]);

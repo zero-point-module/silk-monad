@@ -21,6 +21,7 @@ commands:
       /silk wallet refresh [player]
       /silk crowd [count]
       /silk crowd clear
+      /silk bubbles
     permission: silkmonad.use
   uuid:
     description: Print the UUID of a past-connected player
@@ -44,4 +45,7 @@ permissions:
     default: true
   silkmonad.crowd:
     description: Spawn the ambient villager crowd
+    default: op
+  silkmonad.bubbles:
+    description: Toggle chat bubbles on/off
     default: op

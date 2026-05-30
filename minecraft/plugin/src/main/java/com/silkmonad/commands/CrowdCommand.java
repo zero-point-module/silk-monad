@@ -27,11 +27,17 @@ public final class CrowdCommand {
         if (args.length >= 1 && args[0].toLowerCase(Locale.ROOT).equals("clear")) {
             int before = plugin.crowdManager().activeCount();
             plugin.crowdManager().clear();
-            sender.sendMessage(Component.text("Cleared " + before + " villager(s).", NamedTextColor.GREEN));
+            sender.sendMessage(Component.text("Cleared " + before + " NPC(s).", NamedTextColor.GREEN));
             return;
         }
         if (!(sender instanceof Player p)) {
             sender.sendMessage(Component.text("Run from in-game so I know where to spawn the crowd.", NamedTextColor.RED));
+            return;
+        }
+        if (!plugin.crowdManager().isFancyNpcsAvailable()) {
+            sender.sendMessage(Component.text(
+                    "FancyNpcs plugin not loaded — the crowd needs it to render player-shaped NPCs.",
+                    NamedTextColor.RED));
             return;
         }
         int count = DEFAULT_COUNT;
@@ -45,8 +51,8 @@ public final class CrowdCommand {
                 return;
             }
         }
-        plugin.crowdManager().spawn(p.getLocation(), count);
-        sender.sendMessage(Component.text("Spawned " + count + " villager(s). They'll wander and pair off.",
+        plugin.crowdManager().spawn(p.getLocation(), count, p.getUniqueId());
+        sender.sendMessage(Component.text("Spawned " + count + " NPC(s). They'll wander and trade.",
                 NamedTextColor.GREEN));
     }
 }

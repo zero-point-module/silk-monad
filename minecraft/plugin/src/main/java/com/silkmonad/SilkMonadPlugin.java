@@ -5,6 +5,8 @@ import com.silkmonad.chain.ChainClient;
 import com.silkmonad.chain.TokenRegistry;
 import com.silkmonad.chain.TransactionFetcher;
 import com.silkmonad.chain.Treasury;
+import com.silkmonad.chat.BubbleListener;
+import com.silkmonad.chat.BubbleManager;
 import com.silkmonad.commands.CrowdCommand;
 import com.silkmonad.commands.SilkCommand;
 import com.silkmonad.commands.UuidCommand;
@@ -37,6 +39,7 @@ public final class SilkMonadPlugin extends JavaPlugin {
     private WalletCommand walletCommand;
     private CrowdCommand crowdCommand;
     private CrowdManager crowdManager;
+    private BubbleManager bubbleManager;
 
     public static SilkMonadPlugin get() {
         return instance;
@@ -102,6 +105,11 @@ public final class SilkMonadPlugin extends JavaPlugin {
         // Crowd
         this.crowdManager = new CrowdManager(this, tokens, registry);
 
+        // Chat bubbles
+        this.bubbleManager = new BubbleManager(this);
+        bubbleManager.start();
+        getServer().getPluginManager().registerEvents(new BubbleListener(this, bubbleManager), this);
+
         // Commands
         this.walletCommand = new WalletCommand(this, profiles, holograms);
         this.crowdCommand = new CrowdCommand(this);
@@ -122,6 +130,7 @@ public final class SilkMonadPlugin extends JavaPlugin {
     public void onDisable() {
         if (holograms != null) holograms.detachAll();
         if (crowdManager != null) crowdManager.clear();
+        if (bubbleManager != null) bubbleManager.stop();
     }
 
     /**

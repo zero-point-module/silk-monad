@@ -4,6 +4,7 @@ main: com.silkmonad.SilkMonadPlugin
 api-version: '1.21'
 description: Custom cosmetics framework for the silk-monad server
 authors: [silk-monad]
+softdepend: [FancyNpcs]
 commands:
   silk:
     description: SilkMonad root command

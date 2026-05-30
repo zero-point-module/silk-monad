@@ -1,0 +1,14 @@
+id: silk_blade
+type: item
+display-name: "<gradient:#c084fc:#f0abfc>Silk Blade</gradient>"
+item:
+  material: NETHERITE_SWORD
+  custom-model-data: 1001
+  unbreakable: true
+  hide-attributes: false
+  lore:
+    - "<gray>A blade woven from monad silk.</gray>"
+    - "<dark_purple>Forged in the spaces between worlds.</dark_purple>"
+  enchantments:
+    SHARPNESS: 5
+    UNBREAKING: 3

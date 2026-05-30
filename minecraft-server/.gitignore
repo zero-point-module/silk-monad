@@ -45,6 +45,15 @@ data/plugins/*/logs/
 data/plugins/.paper-remapped/
 data/plugins/bStats/
 data/plugins/spark/tmp-client/
+data/plugins/SkinsRestorer/cache/
+data/plugins/SkinsRestorer/cooldowns/
+data/plugins/SkinsRestorer/players/
+data/plugins/SkinsRestorer/skins/
+data/plugins/SkinsRestorer/locales/
+data/plugins/SkinsRestorer/recommendations.json
+
+# SilkMonad runtime data — cosmetic YAMLs live in plugin/src/main/resources/
+data/plugins/SilkMonad/
 
 # Keep .jar files (Paper server jar + plugin jars) — explicitly not ignored
 !*.jar

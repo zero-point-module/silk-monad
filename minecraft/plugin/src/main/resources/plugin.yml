@@ -18,6 +18,8 @@ commands:
       /silk wallet clear [player]
       /silk wallet show [player]
       /silk wallet refresh [player]
+      /silk crowd [count]
+      /silk crowd clear
     permission: silkmonad.use
   uuid:
     description: Print the UUID of a past-connected player
@@ -39,3 +41,6 @@ permissions:
   silkmonad.wallet.show:
     description: Show any player's linked wallet
     default: true
+  silkmonad.crowd:
+    description: Spawn the ambient villager crowd
+    default: op

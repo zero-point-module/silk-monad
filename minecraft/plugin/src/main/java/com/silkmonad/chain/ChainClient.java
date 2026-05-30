@@ -1,5 +1,9 @@
 package com.silkmonad.chain;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
+
 import java.math.BigInteger;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -43,6 +47,35 @@ public final class ChainClient {
     public CompletableFuture<String> ethSendRawTransaction(String signedTxHex) {
         String params = String.format("[\"%s\"]", signedTxHex);
         return rpc("eth_sendRawTransaction", params);
+    }
+
+    /**
+     * eth_getLogs — returns the result array. `params` is already-encoded JSON
+     * for the filter object, e.g. {@code "{\"address\":[...],\"topics\":[...]}"}.
+     */
+    public CompletableFuture<JsonArray> ethGetLogs(String filterJson) {
+        return rpcRaw("eth_getLogs", "[" + filterJson + "]").thenApply(JsonElement::getAsJsonArray);
+    }
+
+    private CompletableFuture<JsonElement> rpcRaw(String method, String paramsJson) {
+        long id = rpcId.getAndIncrement();
+        String body = String.format(
+                "{\"jsonrpc\":\"2.0\",\"id\":%d,\"method\":\"%s\",\"params\":%s}",
+                id, method, paramsJson);
+        HttpRequest req = HttpRequest.newBuilder(URI.create(rpcUrl))
+                .timeout(Duration.ofSeconds(20))
+                .header("content-type", "application/json")
+                .POST(HttpRequest.BodyPublishers.ofString(body))
+                .build();
+        return http.sendAsync(req, HttpResponse.BodyHandlers.ofString())
+                .thenApply(HttpResponse::body)
+                .thenApply(raw -> {
+                    JsonElement parsed = JsonParser.parseString(raw);
+                    if (parsed.getAsJsonObject().has("error")) {
+                        throw new RuntimeException("RPC error: " + raw);
+                    }
+                    return parsed.getAsJsonObject().get("result");
+                });
     }
 
     private CompletableFuture<String> rpc(String method, String paramsJson) {

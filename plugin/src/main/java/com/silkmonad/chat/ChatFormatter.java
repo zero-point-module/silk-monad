@@ -6,7 +6,6 @@ import io.papermc.paper.event.player.AsyncChatEvent;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
-import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -29,8 +28,9 @@ public final class ChatFormatter implements Listener {
                 : ChatColorPalette.forUuid(speaker.getUniqueId());
 
         event.renderer((source, sourceDisplayName, message, viewer) -> Component.empty()
-                .append(Component.text(speaker.getName(), color, TextDecoration.BOLD))
-                .append(Component.text(" › ", NamedTextColor.GRAY))
+                .append(Component.text("<", NamedTextColor.WHITE))
+                .append(Component.text(speaker.getName(), color))
+                .append(Component.text("> ", NamedTextColor.WHITE))
                 .append(Component.text().color(NamedTextColor.WHITE).append(message).build()));
     }
 }

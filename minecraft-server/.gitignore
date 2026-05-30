@@ -52,5 +52,8 @@ data/plugins/SkinsRestorer/skins/
 data/plugins/SkinsRestorer/locales/
 data/plugins/SkinsRestorer/recommendations.json
 
+# SilkMonad runtime data — cosmetic YAMLs live in plugin/src/main/resources/
+data/plugins/SilkMonad/
+
 # Keep .jar files (Paper server jar + plugin jars) — explicitly not ignored
 !*.jar

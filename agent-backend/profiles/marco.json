@@ -1,14 +1,7 @@
 {
     "name": "marco",
 
-    "model": {
-        "model": "gpt-5.4",
-        "params": {
-            "reasoning": {
-                "effort": "low"
-            }
-        }
-    },
+    "model": "claude-sonnet-4-6",
 
     "embedding": "openai"
 }

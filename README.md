@@ -10,8 +10,6 @@
 
 </div>
 
----
-
 A caravan of fully autonomous LLM agents walks an ancient trade route rebuilt in Minecraft. They talk in character, carry goods, strike deals, and when two merchants agree on a price, **THEY TRADE ON MONAD**.
 
 ## ✨ What it is

@@ -11,6 +11,7 @@ services:
       MEMORY: '2G'
       TZ: 'UTC'
       ONLINE_MODE: 'FALSE'
+      ALLOW_NETHER: 'FALSE'
       VIEW_DISTANCE: '6'
       SIMULATION_DISTANCE: '6'
       SPAWN_PROTECTION: '0'

@@ -1,8 +1,7 @@
 import * as skills from '../library/skills.js';
 import settings from '../settings.js';
 import convoManager from '../conversation.js';
-import * as erc20 from '../../../../blockchain/erc20.js';
-import { getAddress } from '../../../../blockchain/wallets.js';
+import * as quests from '../../../../blockchain/quests.js';
 
 
 function runAsAction (actionFn, resume = false, timeout = -1) {
@@ -502,46 +501,37 @@ export const actionsList = [
         })
     },
     {
-        name: '!payToken',
-        description: "Send an on-chain ERC20 token payment to another bot/player on Monad. Use after you've agreed a price, then tell them the transaction hash so they can verify it.",
+        name: '!createQuest',
+        description: "Create an on-chain quest on Monad: escrow a MON reward and commit to the secret answer (the item type hidden in a chest). Use this as the quest master, then announce the quest id, reward, and clue to the players in chat.",
         params: {
-            'player_name': { type: 'string', description: 'The name of the bot/player to pay.' },
-            'token': { type: 'string', description: 'The token symbol to send, e.g. SILK.' },
-            'amount': { type: 'float', description: 'The amount of the token to send.', domain: [0, Number.MAX_SAFE_INTEGER, '(]'] }
+            'reward': { type: 'float', description: 'Amount of native MON to escrow as the reward for the winner.', domain: [0, Number.MAX_SAFE_INTEGER, '(]'] },
+            'secret': { type: 'string', description: 'The exact item type hidden in the quest chest (this is the answer), e.g. golden_apple.' },
+            'clue': { type: 'string', description: 'A human-readable clue to where the chest is, announced to the players.' }
         },
-        perform: async function (agent, player_name, token, amount) {
+        perform: async function (agent, reward, secret, clue) {
             try {
-                const to = getAddress(player_name);
-                if (!to)
-                    return `No wallet address is on record for ${player_name}; cannot pay them.`;
-                const { hash } = await erc20.transfer(agent.name, token, to, amount);
-                return `Sent ${amount} ${token} to ${player_name} (${to}). Transaction hash: ${hash}. Tell them this hash so they can verify the payment.`;
+                const { hash, questId, factory } = await quests.createQuest(agent.name, secret, reward, clue);
+                return `Quest #${questId} created on Monad (factory ${factory}, tx ${hash}). Reward: ${reward} MON. Clue: ${clue}. First player to !claim the correct answer wins.`;
             } catch (err) {
-                return `Payment failed: ${err.shortMessage || err.message}`;
+                return `Could not create quest: ${err.shortMessage || err.message}`;
             }
         }
     },
     {
-        name: '!verifyPayment',
-        description: "Verify on-chain that a bot/player actually paid you at least the agreed amount of a token, using the transaction hash they gave you. Always do this BEFORE handing over an item.",
+        name: '!claim',
+        description: "Submit your answer to an on-chain quest on Monad. If it is correct AND you are first, you win the MON reward, paid to your wallet. The answer is the item type you found in the quest chest.",
         params: {
-            'player_name': { type: 'string', description: 'The bot/player who claims to have paid you.' },
-            'token': { type: 'string', description: 'The token symbol you expected, e.g. SILK.' },
-            'amount': { type: 'float', description: 'The minimum amount you expected to receive.', domain: [0, Number.MAX_SAFE_INTEGER, '(]'] },
-            'tx_hash': { type: 'string', description: 'The transaction hash the payer gave you.' }
+            'quest_id': { type: 'int', description: 'The quest number announced by the quest master.', domain: [0, Number.MAX_SAFE_INTEGER, '[)'] },
+            'answer': { type: 'string', description: 'Your answer — the item type from the chest, e.g. golden_apple.' }
         },
-        perform: async function (agent, player_name, token, amount, tx_hash) {
+        perform: async function (agent, quest_id, answer) {
             try {
-                const to = getAddress(agent.name);
-                if (!to)
-                    return `You have no wallet address on record; cannot verify payments.`;
-                const from = getAddress(player_name);
-                const res = await erc20.verifyTransfer(tx_hash, { symbol: token, from, to, minAmount: amount });
-                if (res.ok)
-                    return `Payment verified: received ${res.value} ${res.symbol} from ${player_name}. It is now safe to hand over the item.`;
-                return `Payment NOT verified: ${res.reason} Do not hand over the item yet.`;
+                const res = await quests.claim(agent.name, quest_id, answer);
+                if (res.won)
+                    return `You solved quest #${quest_id}! The MON reward was paid to your wallet. Transaction hash: ${res.hash}`;
+                return `Your claim on quest #${quest_id} did not win: ${res.reason}`;
             } catch (err) {
-                return `Could not verify payment: ${err.shortMessage || err.message}`;
+                return `Could not submit your claim: ${err.shortMessage || err.message}`;
             }
         }
     },

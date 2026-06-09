@@ -54,7 +54,19 @@ for (const agent of agentsDoc.agents) {
 writeEnv(env);
 saveAgents(agentsDoc);
 
-console.log('\n  Wallets ready (keys → .env, addresses → agents.json)\n');
+// Mirror each agent key into agent-backend/keys.json as <ID>_PRIVATE_KEY — that's where the
+// runtime bridge (wallets.js) looks for signing keys (resolved by wallet address). Without
+// this, the agents can't sign createQuest/claim on-chain. Preserves existing keys (LLM, etc.).
+const RUNTIME_KEYS = path.join(ROOT, 'agent-backend', 'keys.json');
+let runtimeKeys = {};
+try { runtimeKeys = JSON.parse(fs.readFileSync(RUNTIME_KEYS, 'utf8')); } catch { /* none yet */ }
+for (const agent of agentsDoc.agents) {
+  runtimeKeys[`${agent.id.toUpperCase()}_PRIVATE_KEY`] = env.get(`AGENT_${agent.id.toUpperCase()}_PK`);
+}
+fs.writeFileSync(RUNTIME_KEYS, `${JSON.stringify(runtimeKeys, null, 4)}\n`);
+fs.chmodSync(RUNTIME_KEYS, 0o600);
+
+console.log('\n  Wallets ready (keys → .env + agent-backend/keys.json, addresses → agents.json)\n');
 console.log(`  deployer     ${deployer.address}`);
 for (const agent of agentsDoc.agents) {
   console.log(`  ${agent.id.padEnd(11)}  ${agent.address}`);

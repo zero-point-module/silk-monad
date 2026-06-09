@@ -1,6 +1,6 @@
 const settings = {
     "minecraft_version": "auto", // or specific version like "1.21.6"
-    "host": "201.253.130.133", // or "localhost", "your.ip.address.here"
+    "host": "localhost", // local Docker server (minecraft/server/docker-compose.yml)
     "port": 25565, // set to -1 to automatically scan for open ports
     "auth": "offline", // or "microsoft"
 
@@ -10,13 +10,10 @@ const settings = {
     
     "base_profile": "assistant", // survival, assistant, creative, or god_mode
     "profiles": [
-        // Persona-driven trading agents defined in ../agents.json (reuse funded wallets).
-        "./profiles/marco.json",
-        "./profiles/aisha.json",
-        "./profiles/chen.json",
-        // Extra agents with their own auto-generated (initially empty) wallets.
-        "./profiles/gpt2.json",
-        "./profiles/claude2.json",
+        // MonadQuest cast — personas + funded wallets defined in ../agents.json
+        "./profiles/questmaster.json",
+        "./profiles/aria.json",
+        "./profiles/kai.json",
         // gpt/claude/andy share wallets with the personas above, so leave them off.
         // "./andy.json",
         // "./profiles/gpt.json",

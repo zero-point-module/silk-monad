@@ -4,7 +4,8 @@ import { getCommandDocs } from './index.js';
 import convoManager from '../conversation.js';
 import { checkLevelBlueprint, checkBlueprint } from '../tasks/construction_tasks.js';
 import { load } from 'cheerio';
-import * as erc20 from '../../../../blockchain/erc20.js';
+import { formatEther } from 'viem';
+import { publicClient } from '../../../../blockchain/config.js';
 import { getAddress } from '../../../../blockchain/wallets.js';
 
 const pad = (str) => {
@@ -347,44 +348,23 @@ export const queryList = [
         }
     },
     {
-        name: "!myTokens",
-        description: "List your on-chain balance of ALL tradeable tokens on Monad. Use this to see everything you could offer in a trade before deciding what to pay with.",
+        name: "!myBalance",
+        description: "Check your own wallet's native MON balance on Monad (your gas, plus any quest rewards you've won).",
         perform: async function (agent) {
             try {
                 const addr = getAddress(agent.name);
                 if (!addr)
                     return `No wallet address is on record for you (${agent.name}).`;
-                const balances = await erc20.allBalances(addr);
-                if (balances.length === 0)
-                    return `No tokens are registered to trade.`;
-                const lines = balances.map((b) => b.error ? `- ${b.symbol}: (error: ${b.error})` : `- ${b.symbol}: ${b.formatted}`);
-                return `Your token balances (wallet ${addr}):\n${lines.join('\n')}`;
+                const wei = await publicClient.getBalance({ address: addr });
+                return `You hold ${formatEther(wei)} MON (wallet ${addr}).`;
             } catch (err) {
-                return `Could not get token balances: ${err.message}`;
-            }
-        }
-    },
-    {
-        name: "!tokenBalance",
-        description: "Get your own wallet's on-chain balance of a single token (e.g. SILK, SPICE, JADE) on Monad.",
-        params: {
-            'token': { type: 'string', description: 'The token symbol, e.g. SILK.' }
-        },
-        perform: async function (agent, token) {
-            try {
-                const addr = getAddress(agent.name);
-                if (!addr)
-                    return `No wallet address is on record for you (${agent.name}).`;
-                const bal = await erc20.balanceOf(token, addr);
-                return `You hold ${bal.formatted} ${bal.symbol} (wallet ${addr}).`;
-            } catch (err) {
-                return `Could not get token balance: ${err.message}`;
+                return `Could not get your MON balance: ${err.shortMessage || err.message}`;
             }
         }
     },
     {
         name: "!walletAddress",
-        description: "Get the Monad wallet address of another bot/player so you can pay them tokens.",
+        description: "Get the Monad wallet address of another bot/player.",
         params: {
             'player_name': { type: 'string', description: 'The name of the bot/player whose wallet address you want.' }
         },

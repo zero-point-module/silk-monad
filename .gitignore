@@ -1,3 +1,4 @@
 .env
 .claude
 node_modules/
+docs/
